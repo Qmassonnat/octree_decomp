@@ -15,6 +15,7 @@ public class OctTreeFast : MonoBehaviour
     public float elongated_criteria; // 0 for no merging, high values for aggressive merging
     public bool load;
     [HideInInspector] public NodeData data;
+    private List<GameObject> to_split;
     private string task;
     private float currentScale;
     private double t0;
@@ -36,17 +37,18 @@ public class OctTreeFast : MonoBehaviour
         }
         else
         {
-        t0 = Time.realtimeSinceStartupAsDouble;
-        Vector3 center = new Vector3(0, zBound/2, 0);
-        Vector3 scale = new Vector3(2 * bound, zBound, 2 * bound);
-        BuildOctree(center, scale, gameObject, "0", 
-            new Dictionary<string, List<string>> {
-            { "left", new List<string>{ } },
-            { "right", new List<string>{ } },
-            { "up", new List<string>{ } },
-            { "down", new List<string>{ } },
-            { "forward", new List<string>{ } },
-            { "backward", new List<string>{ } }}
+            t0 = Time.realtimeSinceStartupAsDouble;
+            Vector3 center = new Vector3(0, zBound/2, 0);
+            Vector3 scale = new Vector3(2 * bound, zBound, 2 * bound);
+            to_split = new List<GameObject>();
+            BuildOctree(center, scale, gameObject, "0", 
+                new Dictionary<string, List<string>> {
+                { "left", new List<string>{ } },
+                { "right", new List<string>{ } },
+                { "up", new List<string>{ } },
+                { "down", new List<string>{ } },
+                { "forward", new List<string>{ } },
+                { "backward", new List<string>{ } }}
         );
         task = "build";
         currentScale = Mathf.Min(2 * bound, zBound);
@@ -60,6 +62,12 @@ public class OctTreeFast : MonoBehaviour
         if (task == "build" || currentScale >= minSize)
         {
             currentScale /= 2;
+            List<GameObject> to_split_copy = new List<GameObject>();
+            foreach (GameObject node in to_split)
+                to_split_copy.Add(node);
+            to_split = new List<GameObject>();
+            foreach (GameObject node in to_split_copy)
+                SplitNode(node);
             task = "clean";
         }
         else
@@ -110,15 +118,20 @@ public class OctTreeFast : MonoBehaviour
 
         CustomNode cn = new_node.GetComponent<CustomNode>();
         cn.idx = idx;
-        new_node.name = "_"+idx;
+        new_node.name = "_"+idx;    
         cn.neighbors = neigbors;
+
+        if (!GetComponent<CollisionCheck>().IsEmpty(center, scale))
+        {
+            new_node.tag = "Node";
+            to_split.Add(new_node);
+        }
 
     }
 
 
     public void SplitNode(GameObject node_)
     {
-        node_.tag = "Node";
         // Make sure this node has not already been split
         if (node_.transform.childCount == 0)
         {

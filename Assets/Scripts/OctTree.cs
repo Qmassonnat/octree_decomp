@@ -14,6 +14,7 @@ public class OctTree : MonoBehaviour
     public float elongated_criteria; // 0 for no merging, high values for aggressive merging
     private string task;
     private float currentScale;
+    private List<GameObject> to_split;
     private List<CustomNode> validNodes = new List<CustomNode> { };
     private List<CustomNode> invalidNodes = new List<CustomNode> { };
     Dictionary<string, string> deletedNodes = new Dictionary<string, string>();
@@ -26,6 +27,7 @@ public class OctTree : MonoBehaviour
         t0 = Time.realtimeSinceStartupAsDouble;
         Vector3 center = new Vector3(0, zBound/2, 0);
         Vector3 scale = new Vector3(2 * bound, zBound, 2 * bound);
+        to_split = new List<GameObject>();
         BuildOctree(center, scale, gameObject, "0", 
             new Dictionary<string, List<string>> {
             { "left", new List<string>{ } },
@@ -43,9 +45,15 @@ public class OctTree : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (currentScale >= minSize)
+        if (task == "build" || currentScale >= minSize/2)
         {
             currentScale /= 2;
+            List<GameObject> to_split_copy = new List<GameObject>();
+            foreach (GameObject node in to_split)
+                to_split_copy.Add(node);
+            to_split = new List<GameObject>();
+            foreach (GameObject node in to_split_copy)
+                SplitNode(node);
             task = "clean";
         }
         else
@@ -68,10 +76,10 @@ public class OctTree : MonoBehaviour
                     Debug.Log("After pruning: " + validNodes.Count + " valid nodes " + invalidNodes.Count + " invalid nodes");
                     Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
                 }
-                task = "build";
+                task = "graph";
             }
 
-            else if (task == "build")
+            else if (task == "graph")
             {
                 
                 t0 = Time.realtimeSinceStartupAsDouble;
@@ -98,13 +106,17 @@ public class OctTree : MonoBehaviour
         cn.idx = idx;
         new_node.name = "_"+idx;
         cn.neighbors = neigbors;
+        if (!GetComponent<CollisionCheck>().IsEmpty(center, scale))
+        {
+            new_node.tag = "Node";
+            to_split.Add(new_node);
+        }
 
     }
 
 
     public void SplitNode(GameObject node_)
     {
-        node_.tag = "Node";
         // Make sure this node has not already been split
         if (node_.transform.childCount == 0)
         {
