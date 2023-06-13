@@ -1,0 +1,48 @@
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\0-5.txtsuccess rate0.888
+avg,4.278838,4.959459,0.289
+std,6.55687,351.6198,0.000
+min,0.3961815,0,0.057
+Q1,3.043836,0,0.146
+median,4.010236,0,0.154
+Q3,4.690229,3,0.183
+max,24.50057,187,6.600
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\10-15.txtsuccess rate0.834
+avg,14.7087,29.93405,1.296
+std,9.083045,1807.937,0.005
+min,8.832571,0,0.106
+Q1,12.49402,3,0.322
+median,14.19352,9,0.475
+Q3,16.67254,40,1.409
+max,24.91854,307,32.402
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\15-20.txtsuccess rate0.846
+avg,18.95191,32.89007,1.565
+std,6.900919,2577.027,0.005
+min,13.03038,3,0.110
+Q1,16.99557,3,0.428
+median,18.68448,7,0.576
+Q3,20.43946,44,1.687
+max,29.62335,444,20.802
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\20-25.txtsuccess rate0.873
+avg,23.26486,36.06186,1.993
+std,6.143023,3919.952,0.009
+min,17.41304,3,0.097
+Q1,21.31356,3,0.492
+median,22.88792,5,0.666
+Q3,24.71265,42,2.068
+max,34.51025,473,21.567
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\25-30.txtsuccess rate0.894
+avg,27.82999,38.9877,2.253
+std,4.417564,4868.348,0.014
+min,22.75659,3,0.333
+Q1,26.12721,3,0.556
+median,27.58068,6,0.731
+Q3,29.25852,40,2.215
+max,36.21227,478,51.488
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/3 story building\5-10.txtsuccess rate0.85
+avg,9.728025,17.80824,1.084
+std,12.95429,1129.214,0.002
+min,3.915314,0,0.090
+Q1,7.305426,0,0.491
+median,8.872126,4,0.609
+Q3,11.10722,17,1.025
+max,24.58041,191,14.082

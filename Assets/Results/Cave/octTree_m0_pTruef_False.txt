@@ -1,0 +1,48 @@
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\0-5.txtsuccess rate0.813
+avg,3.229392,7.590406,0.290
+std,1.157091,231.8874,0.000
+min,0.1402402,0,0.019
+Q1,2.482569,3,0.194
+median,3.357029,5,0.232
+Q3,4.028567,8,0.286
+max,10.07769,260,10.352
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\10-15.txtsuccess rate0.79
+avg,12.04338,91.45443,2.335
+std,3.204584,7094.527,0.008
+min,5.529377,5,0.222
+Q1,10.71373,36,0.702
+median,12.04839,65,1.280
+Q3,13.4087,120,2.817
+max,16.87109,647,36.692
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\15-20.txtsuccess rate0.8
+avg,16.79676,181.0688,5.952
+std,3.353759,16347,0.032
+min,10.06341,8,0.268
+Q1,15.5601,89,1.932
+median,16.79342,150,4.170
+Q3,18.11536,238,8.034
+max,21.399,767,34.471
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\20-25.txtsuccess rate0.844
+avg,21.40656,319.0024,15.310
+std,3.019601,39697.93,0.180
+min,14.54107,14,0.479
+Q1,20.17265,174,6.211
+median,21.33282,280,11.309
+Q3,22.63873,416,19.917
+max,26.56464,1287,90.538
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\25-30.txtsuccess rate0.882
+avg,25.80626,547.2744,26.129
+std,2.670596,75548.24,0.330
+min,17.71827,14,0.383
+Q1,24.9448,340,13.076
+median,25.7849,528,23.176
+Q3,26.74141,708,34.371
+max,30.71913,1950,175.340
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Cave\5-10.txtsuccess rate0.782
+avg,7.254185,29.87468,0.863
+std,2.976358,1215.666,0.001
+min,0.7703471,3,0.202
+Q1,6.073481,9,0.378
+median,7.390777,18,0.516
+Q3,8.580898,35,0.877
+max,12.55745,324,10.283

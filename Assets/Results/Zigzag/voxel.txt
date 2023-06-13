@@ -1,0 +1,48 @@
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\0-5.txtsuccess rate1
+avg,4.284833,35.06,2.192
+std,2.730494,4907.552,0.007
+min,0.826894,3,0.536
+Q1,3.450372,10,0.999
+median,4.343515,21,1.781
+Q3,4.985552,40,2.471
+max,15.90508,684,23.679
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\10-15.txtsuccess rate1
+avg,14.90464,552.34,28.594
+std,12.24491,283828.3,1.277
+min,3.454632,8,1.255
+Q1,12.94191,243,8.814
+median,14.10394,408,15.670
+Q3,16.16373,656,32.277
+max,25.03399,2732,196.436
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\15-20.txtsuccess rate1
+avg,21.43599,1468.22,109.199
+std,18.53034,1810614,17.708
+min,15.57963,32,2.226
+Q1,18.11267,497,26.157
+median,20.20232,1133,63.861
+Q3,23.7646,2083,134.116
+max,33.38302,6160,641.368
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\20-25.txtsuccess rate1
+avg,28.96264,3321.08,363.668
+std,20.34962,3143604,79.256
+min,21.02975,375,13.333
+Q1,25.54466,1919,137.222
+median,28.72955,3156,291.936
+Q3,32.20327,4605,540.854
+max,39.68666,8106,1185.578
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\25-30.txtsuccess rate1
+avg,34.63176,5278.05,674.409
+std,12.68583,3702531,103.803
+min,26.13039,1120,78.287
+Q1,32.18742,4103,428.506
+median,34.60658,5082,636.888
+Q3,36.652,6778,951.142
+max,43.15759,9295,1496.976
+C:/Users/qmass/Documents/X/4A/Research/Create with Code/Decomposition test/Assets/TestPoints/Zigzag\5-10.txtsuccess rate1
+avg,9.261892,207.61,12.968
+std,8.374341,125295.4,0.916
+min,3.836182,7,1.641
+Q1,7.798024,43,3.526
+median,9.122335,120,5.774
+Q3,10.21385,212,11.801
+max,22.66372,2873,280.372

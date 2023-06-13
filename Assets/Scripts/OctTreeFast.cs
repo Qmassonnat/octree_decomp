@@ -48,6 +48,13 @@ public class OctTreeFast : MonoBehaviour
                 { "up", new List<string>{ } },
                 { "down", new List<string>{ } },
                 { "forward", new List<string>{ } },
+                { "backward", new List<string>{ } }},
+                new Dictionary<string, List<string>> {
+                { "left", new List<string>{ } },
+                { "right", new List<string>{ } },
+                { "up", new List<string>{ } },
+                { "down", new List<string>{ } },
+                { "forward", new List<string>{ } },
                 { "backward", new List<string>{ } }}
         );
         task = "build";
@@ -105,7 +112,7 @@ public class OctTreeFast : MonoBehaviour
         }
     }
 
-    public void BuildOctree(Vector3 center, Vector3 scale, GameObject parent, string idx, Dictionary<string, List<string>> neigbors)
+    public void BuildOctree(Vector3 center, Vector3 scale, GameObject parent, string idx, Dictionary<string, List<string>> valid_neigbors, Dictionary<string, List<string>> invalid_neighbors)
     {
         GameObject new_node;
         new_node = Instantiate(node,
@@ -119,7 +126,8 @@ public class OctTreeFast : MonoBehaviour
         CustomNode cn = new_node.GetComponent<CustomNode>();
         cn.idx = idx;
         new_node.name = "_"+idx;    
-        cn.neighbors = neigbors;
+        cn.valid_neighbors = valid_neigbors;
+        cn.invalid_neighbors = invalid_neighbors;
 
         if (!GetComponent<CollisionCheck>().IsEmpty(center, scale))
         {
@@ -157,8 +165,8 @@ public class OctTreeFast : MonoBehaviour
                 string idx = node_.GetComponent<CustomNode>().idx;
                 for (int i = 0; i < 8; i++)
                 {
-                    Dictionary<string, List<string>> new_neigbors = cn.ComputeNeighbors(idx, i);         
-                    BuildOctree(new_centers[i], new_scale, node_, idx+i.ToString(), new_neigbors);
+                    var (new_valid_neighbors, new_invalid_neighbors) = cn.ComputeNeighbors(idx, i);         
+                    BuildOctree(new_centers[i], new_scale, node_, idx+i.ToString(), new_valid_neighbors, new_invalid_neighbors);
                 }
             }
             // if the leaf has not already been added
@@ -169,7 +177,8 @@ public class OctTreeFast : MonoBehaviour
                 cvi.scale = current_scale;
                 cvi.name = node_.name;
                 cvi.idx = cn.idx;
-                cvi.neighbors = cn.neighbors;
+                cvi.valid_neighbors = cn.valid_neighbors;
+                cvi.invalid_neighbors = cn.invalid_neighbors;
                 cvi.tag = "Invalid";
                 data.invalidNodes[cvi.name] = cvi;
                 Destroy(node_);
@@ -197,7 +206,8 @@ public class OctTreeFast : MonoBehaviour
             cvv.position = node_.transform.position;
             cvv.scale = node_.transform.lossyScale;
             cvv.idx = cn.idx;
-            cvv.neighbors = cn.neighbors;
+            cvv.valid_neighbors = cn.valid_neighbors;
+            cvv.invalid_neighbors = cn.invalid_neighbors;
             cvv.tag = "Valid";
             data.validNodes[cvv.name] = cvv;
             Destroy(node_);
@@ -214,9 +224,9 @@ public class OctTreeFast : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
+                if (n1.valid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
                 {
-                    CustomNodeScriptable n2 = data.FindNode("_" + n1.neighbors[key][0]);
+                    CustomNodeScriptable n2 = data.FindNode("_" + n1.valid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
                     string opposite = n1.GetOppositeDirection(key);
                     bool elongated = false;
@@ -227,7 +237,7 @@ public class OctTreeFast : MonoBehaviour
                         elongated = n1.scale.x + n2.scale.x > elongated_criteria * Mathf.Min(n1.scale.y, n1.scale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.scale.z + n2.scale.z > elongated_criteria * Mathf.Min(n1.scale.x, n1.scale.y);
-                    if (n2.tag == "Valid" && n2.neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
                         data.deletedNodes[n2.name] = n1.name;
@@ -244,9 +254,9 @@ public class OctTreeFast : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
+                if (n1.invalid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
                 {
-                    CustomNodeScriptable n2 = data.FindNode("_" + n1.neighbors[key][0]);
+                    CustomNodeScriptable n2 = data.FindNode("_" + n1.invalid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
                     string opposite = n1.GetOppositeDirection(key);
                     bool elongated = false;
@@ -257,7 +267,7 @@ public class OctTreeFast : MonoBehaviour
                         elongated = n1.scale.x + n2.scale.x > elongated_criteria * Mathf.Min(n1.scale.y, n1.scale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.scale.z + n2.scale.z > elongated_criteria * Mathf.Min(n1.scale.x, n1.scale.y);
-                    if (n2.tag == "Invalid" && n2.neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.tag == "Invalid" && n2.invalid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
                         data.deletedNodes[n2.name] = n1.name;
@@ -276,18 +286,35 @@ public class OctTreeFast : MonoBehaviour
     {
         foreach (string key in directions) {
             // add the neighbors of n2 to those of n1
-            n1.neighbors[key] = n1.neighbors[key].Union(n2.neighbors[key]).ToList();
+            n1.valid_neighbors[key] = n1.valid_neighbors[key].Union(n2.valid_neighbors[key]).ToList();
             // remove n1 and n2 from the neighbor list
-            n1.neighbors[key].RemoveAll(s => s == n1.idx);
-            n1.neighbors[key].RemoveAll(s => s == n2.idx);
+            n1.valid_neighbors[key].RemoveAll(s => s == n1.idx);
+            n1.valid_neighbors[key].RemoveAll(s => s == n2.idx);
 
             // update the neighbors by adding n1 and removing n2 (set operations)
             string opposite = n1.GetOppositeDirection(key);
-            foreach (string idx in n1.neighbors[key])
+            foreach (string idx in n1.valid_neighbors[key])
             {
                 CustomNodeScriptable neighbor = data.FindNode("_" +idx);
-                neighbor.neighbors[opposite].Remove(n2.idx);
-                neighbor.neighbors[opposite] = neighbor.neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                neighbor.valid_neighbors[opposite].Remove(n2.idx);
+                neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+            }
+        }
+        foreach (string key in directions)
+        {
+            // add the neighbors of n2 to those of n1
+            n1.invalid_neighbors[key] = n1.invalid_neighbors[key].Union(n2.invalid_neighbors[key]).ToList();
+            // remove n1 and n2 from the neighbor list
+            n1.invalid_neighbors[key].RemoveAll(s => s == n1.idx);
+            n1.invalid_neighbors[key].RemoveAll(s => s == n2.idx);
+
+            // update the neighbors by adding n1 and removing n2 (set operations)
+            string opposite = n1.GetOppositeDirection(key);
+            foreach (string idx in n1.invalid_neighbors[key])
+            {
+                CustomNodeScriptable neighbor = data.FindNode("_" + idx);
+                neighbor.invalid_neighbors[opposite].Remove(n2.idx);
+                neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
             }
         }
 
@@ -321,7 +348,7 @@ public class OctTreeFast : MonoBehaviour
         foreach (CustomNodeScriptable cn in data.validNodes.Values)
         {
             Dictionary<(string, string), CustomNodeScriptable> new_transitions = new Dictionary<(string, string), CustomNodeScriptable>();
-            Dictionary<string, List<string>> neighbors = cn.neighbors;
+            Dictionary<string, List<string>> neighbors = cn.valid_neighbors;
             foreach (string key in new string[] { "up", "down", "left", "right", "forward", "backward" })
             {
                 foreach (string neigh_idx in neighbors[key])

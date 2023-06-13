@@ -108,9 +108,9 @@ public class AstarFast : MonoBehaviour
 
         // add edges between the temp node and neighbor transitions
         CustomNodeScriptable cn = data.FindNode(merged_idx);
-        foreach (string key in cn.neighbors.Keys)
+        foreach (string key in cn.valid_neighbors.Keys)
         {
-            foreach (string neigh_idx in cn.neighbors[key])
+            foreach (string neigh_idx in cn.valid_neighbors[key])
             {
                 string trans_idx = "";
                 if (data.nodes.ContainsKey("_" + cn.idx + "&" +"_"+ neigh_idx))

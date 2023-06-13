@@ -71,9 +71,9 @@ public class Astar : MonoBehaviour
 
         // add edges between the temp node and neighbor transitions
         CustomNode cn = GameObject.Find(idx).GetComponent<CustomNode>();
-        foreach (string key in cn.neighbors.Keys)
+        foreach (string key in cn.valid_neighbors.Keys)
         {
-            foreach (string neigh_idx in cn.neighbors[key])
+            foreach (string neigh_idx in cn.valid_neighbors[key])
             {
                 string trans_idx = "";
                 if (nodes.ContainsKey(cn.name + "&" +"_"+ neigh_idx))

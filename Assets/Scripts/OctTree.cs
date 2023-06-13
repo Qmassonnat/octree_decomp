@@ -35,6 +35,13 @@ public class OctTree : MonoBehaviour
             { "up", new List<string>{ } },
             { "down", new List<string>{ } },
             { "forward", new List<string>{ } },
+            { "backward", new List<string>{ } }},
+            new Dictionary<string, List<string>> {
+            { "left", new List<string>{ } },
+            { "right", new List<string>{ } },
+            { "up", new List<string>{ } },
+            { "down", new List<string>{ } },
+            { "forward", new List<string>{ } },
             { "backward", new List<string>{ } }}
         );
         task = "build";
@@ -91,7 +98,7 @@ public class OctTree : MonoBehaviour
         }
     }
 
-    public void BuildOctree(Vector3 center, Vector3 scale, GameObject parent, string idx, Dictionary<string, List<string>> neigbors)
+    public void BuildOctree(Vector3 center, Vector3 scale, GameObject parent, string idx, Dictionary<string, List<string>> valid_neigbors, Dictionary<string, List<string>> invalid_neighbors)
     {
         GameObject new_node;
         new_node = Instantiate(node,
@@ -105,7 +112,8 @@ public class OctTree : MonoBehaviour
         CustomNode cn = new_node.GetComponent<CustomNode>();
         cn.idx = idx;
         new_node.name = "_"+idx;
-        cn.neighbors = neigbors;
+        cn.valid_neighbors = valid_neigbors;
+        cn.invalid_neighbors = invalid_neighbors;
         if (!GetComponent<CollisionCheck>().IsEmpty(center, scale))
         {
             new_node.tag = "Node";
@@ -142,8 +150,8 @@ public class OctTree : MonoBehaviour
                 string idx = node_.GetComponent<CustomNode>().idx;
                 for (int i = 0; i < 8; i++)
                 {
-                    Dictionary<string, List<string>> new_neigbors = cn.ComputeNeighbors(idx, i);         
-                    BuildOctree(new_centers[i], new_scale, node_, idx+i.ToString(), new_neigbors);
+                    var (valid_neighbors, invalid_neighbors) = cn.ComputeNeighbors(idx, i);         
+                    BuildOctree(new_centers[i], new_scale, node_, idx+i.ToString(), valid_neighbors, invalid_neighbors);
                 }
             }
             // if the leaf has not already been added
@@ -156,7 +164,8 @@ public class OctTree : MonoBehaviour
 
                 CustomNode cvi = vi.GetComponent<CustomNode>();
                 cvi.idx = cn.idx;
-                cvi.neighbors = cn.neighbors;
+                cvi.valid_neighbors = cn.valid_neighbors;
+                cvi.invalid_neighbors = cn.invalid_neighbors;
                 cvi.tag = "Invalid";
                 invalidNodes.Add(cvi);
                 Destroy(node_);
@@ -185,7 +194,8 @@ public class OctTree : MonoBehaviour
             CustomNode cvv = vv.GetComponent<CustomNode>();
             cvv.idx = cn.idx;
             vv.name = "_" + cn.idx;
-            cvv.neighbors = cn.neighbors;
+            cvv.valid_neighbors = cn.valid_neighbors;
+            cvv.invalid_neighbors = cn.invalid_neighbors;
             cvv.tag = "Valid";
             validNodes.Add(cvv);
             Destroy(node_);
@@ -203,9 +213,9 @@ public class OctTree : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.neighbors[key].Count == 1 && !deletedNodes.ContainsKey(n1.name))
+                if (n1.valid_neighbors[key].Count == 1 && !deletedNodes.ContainsKey(n1.name))
                 {
-                    CustomNode n2 = GameObject.Find("_" + n1.neighbors[key][0]).GetComponent<CustomNode>();
+                    CustomNode n2 = GameObject.Find("_" + n1.valid_neighbors[key][0]).GetComponent<CustomNode>();
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
                     string opposite = n1.GetOppositeDirection(key);
                     bool elongated = false;
@@ -216,7 +226,7 @@ public class OctTree : MonoBehaviour
                         elongated = n1.transform.lossyScale.x + n2.transform.lossyScale.x > elongated_criteria * Mathf.Min(n1.transform.lossyScale.y, n1.transform.lossyScale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.transform.lossyScale.z + n2.transform.lossyScale.z > elongated_criteria * Mathf.Min(n1.transform.lossyScale.x, n1.transform.lossyScale.y);
-                    if (n2.gameObject.CompareTag("Valid") && n2.neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.gameObject.CompareTag("Valid") && n2.valid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
                         deletedNodes[n2.name] = n1.name;
@@ -233,9 +243,9 @@ public class OctTree : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.neighbors[key].Count == 1 && !deletedNodes.ContainsKey(n1.name))
+                if (n1.invalid_neighbors[key].Count == 1 && !deletedNodes.ContainsKey(n1.name))
                 {
-                    CustomNode n2 = GameObject.Find("_" + n1.neighbors[key][0]).GetComponent<CustomNode>();
+                    CustomNode n2 = GameObject.Find("_" + n1.invalid_neighbors[key][0]).GetComponent<CustomNode>();
                     // if n2 is invalid and only has n1 as neighbor on the opposite direction merge them
                     string opposite = n1.GetOppositeDirection(key);
                     bool elongated = false;
@@ -246,7 +256,7 @@ public class OctTree : MonoBehaviour
                         elongated = n1.transform.lossyScale.x + n2.transform.lossyScale.x > elongated_criteria * Mathf.Min(n1.transform.lossyScale.y, n1.transform.lossyScale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.transform.lossyScale.z + n2.transform.lossyScale.z > elongated_criteria * Mathf.Min(n1.transform.lossyScale.x, n1.transform.lossyScale.y);
-                    if (n2.gameObject.CompareTag("Invalid") && n2.neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.gameObject.CompareTag("Invalid") && n2.invalid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
                         deletedNodes[n2.name] = n1.name;
@@ -264,18 +274,35 @@ public class OctTree : MonoBehaviour
     {
         foreach (string key in directions) {
             // add the neighbors of n2 to those of n1
-            n1.neighbors[key] = n1.neighbors[key].Union(n2.neighbors[key]).ToList();
+            n1.valid_neighbors[key] = n1.valid_neighbors[key].Union(n2.valid_neighbors[key]).ToList();
             // remove n1 and n2 from the neighbor list
-            n1.neighbors[key].RemoveAll(s => s == n1.idx);
-            n1.neighbors[key].RemoveAll(s => s == n2.idx);
+            n1.valid_neighbors[key].RemoveAll(s => s == n1.idx);
+            n1.valid_neighbors[key].RemoveAll(s => s == n2.idx);
 
             // update the neighbors by adding n1 and removing n2 (set operations)
             string opposite = n1.GetOppositeDirection(key);
-            foreach (string idx in n1.neighbors[key])
+            foreach (string idx in n1.valid_neighbors[key])
             {
                 CustomNode neighbor = GameObject.Find("_" + idx).GetComponent<CustomNode>();
-                neighbor.neighbors[opposite].Remove(n2.idx);
-                neighbor.neighbors[opposite] = neighbor.neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                neighbor.valid_neighbors[opposite].Remove(n2.idx);
+                neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+            }
+        }
+        foreach (string key in directions)
+        {
+            // add the neighbors of n2 to those of n1
+            n1.invalid_neighbors[key] = n1.invalid_neighbors[key].Union(n2.invalid_neighbors[key]).ToList();
+            // remove n1 and n2 from the neighbor list
+            n1.invalid_neighbors[key].RemoveAll(s => s == n1.idx);
+            n1.invalid_neighbors[key].RemoveAll(s => s == n2.idx);
+
+            // update the neighbors by adding n1 and removing n2 (set operations)
+            string opposite = n1.GetOppositeDirection(key);
+            foreach (string idx in n1.invalid_neighbors[key])
+            {
+                CustomNode neighbor = GameObject.Find("_" + idx).GetComponent<CustomNode>();
+                neighbor.invalid_neighbors[opposite].Remove(n2.idx);
+                neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
             }
         }
 
@@ -317,7 +344,7 @@ public class OctTree : MonoBehaviour
         foreach (CustomNode cn in validNodes)
         {
             Dictionary<(string, string), CustomNode> new_transitions = new Dictionary<(string, string), CustomNode>();
-            Dictionary<string, List<string>> neighbors = cn.neighbors;
+            Dictionary<string, List<string>> neighbors = cn.valid_neighbors;
             foreach (string key in new string[] { "up", "down", "left", "right", "forward", "backward" })
             {
                 foreach (string neigh_idx in neighbors[key])
