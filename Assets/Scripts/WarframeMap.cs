@@ -31,7 +31,7 @@ public class WarframeMap : MonoBehaviour
             min_coord = Vector3.Min(min_coord, obstacle_coord);
             s = sr.ReadLine();
         }
-        Debug.Log(map_size + " " + min_coord + " " + max_coord);
+        //Debug.Log(map_size + " " + min_coord + " " + max_coord);
     }
 
 }
