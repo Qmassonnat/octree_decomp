@@ -38,6 +38,7 @@ public class CustomNode : MonoBehaviour
 
     public (Dictionary<string, List<string>>, Dictionary<string, List<string>>) ComputeNeighbors(string idx, int i)
     {
+        // from the neighbors of a node about to be split, compute the correct neighbors for a child node
         Dictionary<string, List<string>> new_valid_neighbors = new Dictionary<string, List<string>>(valid_neighbors.Count,
                                                             valid_neighbors.Comparer);
         // copy the old dictionnary
@@ -97,20 +98,12 @@ public class CustomNode : MonoBehaviour
                 }
             }
         }
-
-        // Add the correct children as new neighbors
-        foreach (string direction in directions)
-        {
-            if (TestDirection(direction, i))
-                new_invalid_neighbors[direction].Add(idx + (i + Direction2Int(direction)).ToString());
-        }
-
         return (new_valid_neighbors, new_invalid_neighbors);
-    
     }
 
     public void UpdateNeighborsOnSplit()
     {
+        // when splitting a node, update the adjacent nodes' neighbors to have the relevant smaller nodes
         foreach (KeyValuePair<string, List<string>> entry in valid_neighbors)
         {
 

@@ -361,3 +361,16 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+Library/
+Logs/
+Assets/FreeFlyCamera
+Assets/Materials
+Assets/SampleScenes
+Assets/SciFi Warehouse Kit
+Assets/Standard Assets
+Assets/TestPoints
+Assets/Warframe
+Temp
+UserSettings
+Results.ipynb

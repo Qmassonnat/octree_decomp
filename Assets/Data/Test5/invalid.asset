@@ -1,0 +1,286 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8049707537473464747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _000
+  m_EditorClassIdentifier: 
+  idx: 000
+  neigh_up:
+  - 004
+  neigh_down: []
+  neigh_left: []
+  neigh_right:
+  - 001
+  neigh_back: []
+  neigh_forth:
+  - 002
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -7.5, y: 2.5, z: -7.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-5704725036807506692
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _030
+  m_EditorClassIdentifier: 
+  idx: 030
+  neigh_up:
+  - 034
+  neigh_down: []
+  neigh_left:
+  - 021
+  neigh_right:
+  - 031
+  neigh_back:
+  - 012
+  neigh_forth:
+  - 032
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 2.5, y: 2.5, z: 2.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-3993853741110295968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _032
+  m_EditorClassIdentifier: 
+  idx: 032
+  neigh_up:
+  - 036
+  neigh_down: []
+  neigh_left:
+  - 023
+  neigh_right:
+  - 033
+  neigh_back:
+  - 030
+  neigh_forth: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 2.5, y: 2.5, z: 7.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-3004611975406379528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _010
+  m_EditorClassIdentifier: 
+  idx: 010
+  neigh_up:
+  - 014
+  neigh_down: []
+  neigh_left:
+  - 001
+  neigh_right:
+  - 011
+  neigh_back: []
+  neigh_forth:
+  - 012
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 2.5, y: 2.5, z: -7.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-1526136428064964119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _022
+  m_EditorClassIdentifier: 
+  idx: 022
+  neigh_up:
+  - 026
+  neigh_down: []
+  neigh_left: []
+  neigh_right:
+  - 023
+  neigh_back:
+  - 020
+  neigh_forth: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -7.5, y: 2.5, z: 7.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-112338849481288843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _012
+  m_EditorClassIdentifier: 
+  idx: 012
+  neigh_up:
+  - 016
+  neigh_down: []
+  neigh_left:
+  - 003
+  neigh_right:
+  - 013
+  neigh_back:
+  - 010
+  neigh_forth:
+  - 030
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 2.5, y: 2.5, z: -2.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: invalid
+  m_EditorClassIdentifier: 
+  idx: 
+  neigh_up: []
+  neigh_down: []
+  neigh_left: []
+  neigh_right: []
+  neigh_back: []
+  neigh_forth: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 0, y: 0, z: 0}
+  scale: {x: 0, y: 0, z: 0}
+  tag: 
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &755181661559389884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _002
+  m_EditorClassIdentifier: 
+  idx: 002
+  neigh_up:
+  - 006
+  neigh_down: []
+  neigh_left: []
+  neigh_right:
+  - 003
+  neigh_back:
+  - 000
+  neigh_forth:
+  - 020
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -7.5, y: 2.5, z: -2.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &6451457561250477755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: _020
+  m_EditorClassIdentifier: 
+  idx: 020
+  neigh_up:
+  - 024
+  neigh_down: []
+  neigh_left: []
+  neigh_right:
+  - 021
+  neigh_back:
+  - 002
+  neigh_forth:
+  - 022
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -7.5, y: 2.5, z: 2.5}
+  scale: {x: 5, y: 5, z: 5}
+  tag: Invalid
+  edge_idx: []
+  edge_dist: []
