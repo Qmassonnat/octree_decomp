@@ -16,6 +16,7 @@ public class CollisionCheck : MonoBehaviour
     void Update()
     {
         // TODO: update obstacles, maybe once every 5 or 10 frames?
+        UpdateObstacles();
     }
 
     void UpdateObstacles()
@@ -62,11 +63,5 @@ public class CollisionCheck : MonoBehaviour
                 return false;
         }
         return true;
-    }
-
-    public List<CustomNodeScriptable> ComputeIntersectionNode(Vector3 obsCenter, Vector3 obsScale)
-    {
-        // returns the list of nodes intersection the input obstacle
-        return new List<CustomNodeScriptable>();
     }
 }

@@ -30,6 +30,11 @@ public class Astar : MonoBehaviour
         edges = new Dictionary<string, List<(string, float)>>();
         start = GameObject.Find("Start").transform.position;
         target = GameObject.Find("Target").transform.position;
+        if (draw)
+        {
+            drawPath = new GameObject();
+            drawPath.name = "DrawPath";
+        }
     }
 
     // Update is called once per frame
@@ -100,11 +105,6 @@ public class Astar : MonoBehaviour
 
     (int, float, float) A_star_path(Vector3 start, Vector3 target)
     {
-        if (draw)
-        {
-            drawPath = new GameObject();
-            drawPath.name = "DrawPath";
-        }
         nb_visited = 0;
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double t0 = Time.realtimeSinceStartupAsDouble;
@@ -273,5 +273,15 @@ public class Astar : MonoBehaviour
         new_path.Reverse();
         //Debug.Log("Before pruning path " + path.Count + " nodes, length " + old_dist + " after pruning " + new_path.Count + " nodes, length " + new_dist);
         return new_path;
+    }
+
+    public void RecomputePath()
+    {
+        if (draw)
+        {
+            while (drawPath.transform.childCount > 0)
+                DestroyImmediate(drawPath.transform.GetChild(0).gameObject);
+        }
+        var (nb_visited, path_length, dt) = A_star_path(start, target);
     }
 }

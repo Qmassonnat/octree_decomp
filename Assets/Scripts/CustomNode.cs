@@ -106,7 +106,6 @@ public class CustomNode : MonoBehaviour
         // when splitting a node, update the adjacent nodes' neighbors to have the relevant smaller nodes
         foreach (KeyValuePair<string, List<string>> entry in valid_neighbors)
         {
-
             // for each neighbor, update their list with the correct children nodes
             foreach (string neighbor_ in entry.Value)
             {
@@ -161,6 +160,128 @@ public class CustomNode : MonoBehaviour
 
                     cn.AddInvalidNeighbors(GetOppositeDirection(entry.Key), new List<string> { idx + (last + Direction2Int(entry.Key)).ToString() });
                 }
+            }
+        }
+    }
+
+    public void UpdateNeighborsOnInvalid()
+    {
+        // udpate the neighbors when a node becomes invalid
+        foreach (KeyValuePair<string, List<string>> entry in valid_neighbors)
+        {
+
+            // for each neighbor, update their list with the correct children nodes
+            foreach (string neighbor_ in entry.Value)
+            {
+                // get the CustomNode associated with that neighbor
+                CustomNode cn = GameObject.Find("_" + neighbor_).GetComponent<CustomNode>();
+                // remove the node from valid neighbors and it to invalid neighbors
+                cn.valid_neighbors[GetOppositeDirection(entry.Key)].Remove(idx);
+                cn.invalid_neighbors[GetOppositeDirection(entry.Key)].Add(idx);
+            }
+        }
+        foreach (KeyValuePair<string, List<string>> entry in invalid_neighbors)
+        {
+
+            // for each neighbor, update their list with the correct children nodes
+            foreach (string neighbor_ in entry.Value)
+            {
+                // get the CustomNode associated with that neighbor
+                CustomNode cn = GameObject.Find("_" + neighbor_).GetComponent<CustomNode>();
+                // remove the node from valid neighbors and it to invalid neighbors
+                cn.valid_neighbors[GetOppositeDirection(entry.Key)].Remove(idx);
+                cn.invalid_neighbors[GetOppositeDirection(entry.Key)].Add(idx);
+            }
+        }
+
+    }
+
+    public void UpdateNeighborsOnValid()
+    {
+        // udpate the neighbors when a node becomes valid
+        foreach (KeyValuePair<string, List<string>> entry in valid_neighbors)
+        {
+
+            // for each neighbor, update their list with the correct children nodes
+            foreach (string neighbor_ in entry.Value)
+            {
+                // get the CustomNode associated with that neighbor
+                CustomNode cn = GameObject.Find("_" + neighbor_).GetComponent<CustomNode>();
+                // remove the node from valid neighbors and add it to invalid neighbors
+                cn.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(idx);
+                cn.valid_neighbors[GetOppositeDirection(entry.Key)].Add(idx);
+            }
+        }
+        foreach (KeyValuePair<string, List<string>> entry in invalid_neighbors)
+        {
+
+            // for each neighbor, update their list with the correct children nodes
+            foreach (string neighbor_ in entry.Value)
+            {
+                // get the CustomNode associated with that neighbor
+                CustomNode cn = GameObject.Find("_" + neighbor_).GetComponent<CustomNode>();
+                // remove the node from valid neighbors and add it to invalid neighbors
+                cn.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(idx);
+                cn.valid_neighbors[GetOppositeDirection(entry.Key)].Add(idx);
+            }
+        }
+    }
+
+    public void UpdateNeighborsOnMerge(GameObject parent)
+    {
+        // compute the neighbors of the parent from the children's neighbors
+        CustomNode cn_parent = parent.GetComponent<CustomNode>();
+        // discard the old neighbor information of the parent
+        foreach (string direction in directions)
+        {
+            cn_parent.valid_neighbors[direction] = new List<string>();
+            cn_parent.invalid_neighbors[direction] = new List<string>();
+        }
+        foreach (Transform t in parent.transform)
+        {
+            CustomNode cn = t.gameObject.GetComponent<CustomNode>();
+            int i = int.Parse(t.name[t.name.Length - 1].ToString());
+            foreach (var direction in directions)
+            {
+                // only add the non-children neighbors
+                if (!TestDirection(direction, i)) {
+                    foreach (var neighbor in cn.valid_neighbors[direction])
+                    {
+                        // make sure the neighbor has not already been added
+                        if (!cn_parent.valid_neighbors[direction].Contains(neighbor))
+                            cn_parent.valid_neighbors[direction].Add(neighbor);
+                        // remove the child from the adjacent node's neighbor list
+                        CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                        cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
+                    }
+                    foreach (var neighbor in cn.invalid_neighbors[direction])
+                    {
+                        if (!cn_parent.invalid_neighbors[direction].Contains(neighbor))
+                            cn_parent.invalid_neighbors[direction].Add(neighbor);
+                        // remove the child from the adjacent node's neighbor list
+                        CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                        cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
+                    }
+                }
+            }
+        }
+        // update the adjacent's neighbors to reference the parent and not the children
+        foreach (string direction in directions)
+        {
+            foreach (var neighbor in cn_parent.valid_neighbors[direction])
+            {
+                // add the parent to the adjacent node's neighbor list
+                CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
+            }
+        }
+        foreach (string direction in directions)
+        {
+            foreach (var neighbor in cn_parent.invalid_neighbors[direction])
+            {
+                // add the parent to the adjacent node's neighbor list
+                CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
             }
         }
     }
