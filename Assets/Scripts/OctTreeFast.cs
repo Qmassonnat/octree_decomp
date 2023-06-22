@@ -9,15 +9,13 @@ using UnityEngine.SceneManagement;
 public class OctTreeFast : MonoBehaviour
 {
     public float minSize;
-    public GameObject node;
     public float bound;
     public float zBound;
     public float elongated_criteria; // 0 for no merging, high values for aggressive merging
     public bool load;
     [HideInInspector] public NodeData data;
-    private List<GameObject> to_split;
+    private List<CustomNodeScriptable> to_split;
     private string task;
-    private float currentScale;
     private double t0;
     private string[] directions;
 
@@ -40,8 +38,8 @@ public class OctTreeFast : MonoBehaviour
             t0 = Time.realtimeSinceStartupAsDouble;
             Vector3 center = new Vector3(0, zBound/2, 0);
             Vector3 scale = new Vector3(2 * bound, zBound, 2 * bound);
-            to_split = new List<GameObject>();
-            BuildOctree(center, scale, gameObject, "0", 
+            to_split = new List<CustomNodeScriptable>();
+            BuildOctree(center, scale, null, "0", 
                 new Dictionary<string, List<string>> {
                 { "left", new List<string>{ } },
                 { "right", new List<string>{ } },
@@ -58,7 +56,6 @@ public class OctTreeFast : MonoBehaviour
                 { "backward", new List<string>{ } }}
         );
         task = "build";
-        currentScale = Mathf.Min(2 * bound, zBound);
         directions = new string[] { "up", "down", "left", "right", "forward", "backward" };
         }
     }
@@ -66,123 +63,108 @@ public class OctTreeFast : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (task == "build" || currentScale >= minSize)
+        if (task == "build")
         {
-            currentScale /= 2;
-            List<GameObject> to_split_copy = new List<GameObject>();
-            foreach (GameObject node in to_split)
-                to_split_copy.Add(node);
-            to_split = new List<GameObject>();
-            foreach (GameObject node in to_split_copy)
+            while (to_split.Count > 0)
+            {
+                var node = to_split[0];
+                to_split.Remove(to_split.First());
                 SplitNode(node);
-            task = "clean";
+            }
+            task = "prune";
+        }
+        else if (task == "prune")
+        {
+            Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("Before pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
+            if (elongated_criteria > 0)
+            {
+                t0 = Time.realtimeSinceStartupAsDouble;
+                PruneOctTree();
+                Debug.Log("After pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
+                Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            }
+            task = "graph";
+        }
+
+        else if (task == "graph")
+        {
+            t0 = Time.realtimeSinceStartupAsDouble;
+            task = "finished";
+            gameObject.tag = "Finished";
+            BuildGraph();
+            Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
         else
         {
-            if (task == "clean")
-            {
-                Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-                t0 = Time.realtimeSinceStartupAsDouble;
-                task = "prune";
-                CleanOctTree();
-            }
-            else if (task == "prune")
-            {
-                Debug.Log("OctTree cleaned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-                Debug.Log("Before pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
-                if (elongated_criteria > 0)
-                {
-                    t0 = Time.realtimeSinceStartupAsDouble;
-                    PruneOctTree();
-                    Debug.Log("After pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
-                    Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-                }
-                task = "graph";
-            }
-
-            else if (task == "graph")
-            {
-                
-                t0 = Time.realtimeSinceStartupAsDouble;
-                task = "finished";
-                gameObject.tag = "Finished";
-                BuildGraph();
-                Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            }
+            //t0 = Time.realtimeSinceStartupAsDouble;
+            UpdateOctTree();
+            //Debug.Log("OctTree updated in  " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
     }
 
-    public void BuildOctree(Vector3 center, Vector3 scale, GameObject parent, string idx, Dictionary<string, List<string>> valid_neigbors, Dictionary<string, List<string>> invalid_neighbors)
+    public void BuildOctree(Vector3 position, Vector3 scale, CustomNodeScriptable parent, string idx, Dictionary<string, List<string>> valid_neigbors, Dictionary<string, List<string>> invalid_neighbors)
     {
-        GameObject new_node;
-        new_node = Instantiate(node,
-            center,
-            parent.transform.rotation) ;
-        new_node.transform.localScale = scale;
+        CustomNodeScriptable new_node = ScriptableObject.CreateInstance<CustomNodeScriptable>();
+        new_node.position = position;
+        new_node.scale = scale;
         new_node.tag = "Valid";
         if (parent)
-            new_node.transform.parent = parent.transform;
-
-        CustomNode cn = new_node.GetComponent<CustomNode>();
-        cn.idx = idx;
-        new_node.name = "_"+idx;    
-        cn.valid_neighbors = valid_neigbors;
-        cn.invalid_neighbors = invalid_neighbors;
-
-        if (!GetComponent<CollisionCheck>().IsEmpty(center, scale))
         {
-            new_node.tag = "Node";
-            to_split.Add(new_node);
+            new_node.parent = parent.idx;
+            parent.children.Add(idx);
         }
 
+        new_node.idx = idx;
+        new_node.name = idx;
+        new_node.valid_neighbors = valid_neigbors;
+        new_node.invalid_neighbors = invalid_neighbors;
+        data.validNodes[new_node.idx] = new_node;
+
+        // if there is an obstacle in the node split it
+        if (!GetComponent<CollisionCheck>().IsEmpty(position, scale))
+        {
+            to_split.Add(new_node);
+        }
     }
 
 
-    public void SplitNode(GameObject node_)
+    public void SplitNode(CustomNodeScriptable node_)
     {
-        // Make sure this node has not already been split
-        if (node_.transform.childCount == 0)
+        // if this was a valid leaf turn it into a node
+        if (node_.tag == "Valid")
         {
-            Vector3 current_scale = node_.transform.lossyScale;
-            CustomNode cn = node_.GetComponent<CustomNode>();
-            if (current_scale.x > minSize)
-            {
-                Vector3[] new_centers = new Vector3[8];
-                Vector3 center = node_.transform.position;
+            ChangeType(node_, "Valid", "Node");
+        }
+        Vector3 current_scale = node_.scale;
+        if (current_scale.x > minSize)
+        {
+            Vector3[] new_centers = new Vector3[8];
+            Vector3 center = node_.position;
 
-                Vector3 new_scale = current_scale / 2;
-                Vector3 corner = Center2corner(center, current_scale);
-                new_centers[0] = Corner2center(corner, new_scale);
-                new_centers[1] = Corner2center(corner + Vector3.right * new_scale.x, new_scale);
-                new_centers[2] = Corner2center(corner + Vector3.forward * new_scale.z, new_scale);
-                new_centers[3] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.forward * new_scale.z, new_scale);
-                new_centers[4] = Corner2center(corner + Vector3.up * new_scale.y, new_scale);
-                new_centers[5] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.up * new_scale.y, new_scale);
-                new_centers[6] = Corner2center(corner + Vector3.up * new_scale.y + Vector3.forward * new_scale.z, new_scale);
-                new_centers[7] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.up * new_scale.y + Vector3.forward * new_scale.z, new_scale);
+            Vector3 new_scale = current_scale / 2;
+            Vector3 corner = Center2corner(center, current_scale);
+            new_centers[0] = Corner2center(corner, new_scale);
+            new_centers[1] = Corner2center(corner + Vector3.right * new_scale.x, new_scale);
+            new_centers[2] = Corner2center(corner + Vector3.forward * new_scale.z, new_scale);
+            new_centers[3] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.forward * new_scale.z, new_scale);
+            new_centers[4] = Corner2center(corner + Vector3.up * new_scale.y, new_scale);
+            new_centers[5] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.up * new_scale.y, new_scale);
+            new_centers[6] = Corner2center(corner + Vector3.up * new_scale.y + Vector3.forward * new_scale.z, new_scale);
+            new_centers[7] = Corner2center(corner + Vector3.right * new_scale.x + Vector3.up * new_scale.y + Vector3.forward * new_scale.z, new_scale);
 
-                cn.UpdateNeighborsOnSplit();
-                string idx = node_.GetComponent<CustomNode>().idx;
-                for (int i = 0; i < 8; i++)
-                {
-                    var (new_valid_neighbors, new_invalid_neighbors) = cn.ComputeNeighbors(idx, i);         
-                    BuildOctree(new_centers[i], new_scale, node_, idx+i.ToString(), new_valid_neighbors, new_invalid_neighbors);
-                }
-            }
-            // if the leaf has not already been added
-            else if (!data.invalidNodes.ContainsKey(node_.name))
+            data.UpdateNeighborsOnSplit(node_);
+            for (int i = 0; i < 8; i++)
             {
-                CustomNodeScriptable cvi = ScriptableObject.CreateInstance<CustomNodeScriptable>();
-                cvi.position = node_.transform.position;
-                cvi.scale = current_scale;
-                cvi.name = node_.name;
-                cvi.idx = cn.idx;
-                cvi.valid_neighbors = cn.valid_neighbors;
-                cvi.invalid_neighbors = cn.invalid_neighbors;
-                cvi.tag = "Invalid";
-                data.invalidNodes[cvi.name] = cvi;
-                Destroy(node_);
+                var (new_valid_neighbors, new_invalid_neighbors) = data.ComputeNeighbors(node_, i);         
+                BuildOctree(new_centers[i], new_scale, node_, node_.idx+i.ToString(), new_valid_neighbors, new_invalid_neighbors);
             }
+        }
+        // if the leaf has not already been added
+        else if (!data.invalidNodes.ContainsKey(node_.idx))
+        {
+            data.UpdateNeighborsOnInvalid(node_);
+            ChangeType(node_, "Node", "Invalid");
         }
     }
 
@@ -195,24 +177,6 @@ public class OctTreeFast : MonoBehaviour
     {
         return corner + scale / 2;
     }
-    public void CleanOctTree() {
-        GameObject[] nodes;
-        nodes = GameObject.FindGameObjectsWithTag("Valid");
-        foreach (GameObject node_ in nodes)
-        {
-            CustomNode cn = node_.GetComponent<CustomNode>();
-            CustomNodeScriptable cvv = ScriptableObject.CreateInstance<CustomNodeScriptable>();
-            cvv.name = node_.name;
-            cvv.position = node_.transform.position;
-            cvv.scale = node_.transform.lossyScale;
-            cvv.idx = cn.idx;
-            cvv.valid_neighbors = cn.valid_neighbors;
-            cvv.invalid_neighbors = cn.invalid_neighbors;
-            cvv.tag = "Valid";
-            data.validNodes[cvv.name] = cvv;
-            Destroy(node_);
-        }
-    }
 
     public void PruneOctTree()
     {
@@ -224,11 +188,11 @@ public class OctTreeFast : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.valid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
+                if (n1.valid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.idx))
                 {
-                    CustomNodeScriptable n2 = data.FindNode("_" + n1.valid_neighbors[key][0]);
+                    CustomNodeScriptable n2 = data.FindNode(n1.valid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
-                    string opposite = n1.GetOppositeDirection(key);
+                    string opposite = data.GetOppositeDirection(key);
                     bool elongated = false;
                     // don't merge if the resulting node would be too elongated
                     if (key == "up" || key == "down")
@@ -240,7 +204,7 @@ public class OctTreeFast : MonoBehaviour
                     if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
-                        data.deletedNodes[n2.name] = n1.name;
+                        data.deletedNodes[n2.idx] = n1.idx;
                         // add n1 again to check if this merge enabled further merges
                         validStack.Push(n1);
                         break;
@@ -254,11 +218,11 @@ public class OctTreeFast : MonoBehaviour
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.invalid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.name))
+                if (n1.invalid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.idx))
                 {
-                    CustomNodeScriptable n2 = data.FindNode("_" + n1.invalid_neighbors[key][0]);
+                    CustomNodeScriptable n2 = data.FindNode(n1.invalid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
-                    string opposite = n1.GetOppositeDirection(key);
+                    string opposite = data.GetOppositeDirection(key);
                     bool elongated = false;
                     // don't merge if the resulting node would be too elongated
                     if (key == "up" || key == "down")
@@ -270,7 +234,7 @@ public class OctTreeFast : MonoBehaviour
                     if (n2.tag == "Invalid" && n2.invalid_neighbors[opposite].Count == 1 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
-                        data.deletedNodes[n2.name] = n1.name;
+                        data.deletedNodes[n2.idx] = n1.idx;
                         // add n1 again to check if this merge enabled further merges
                         invalidStack.Push(n1);
                         break;
@@ -292,10 +256,10 @@ public class OctTreeFast : MonoBehaviour
             n1.valid_neighbors[key].RemoveAll(s => s == n2.idx);
 
             // update the neighbors by adding n1 and removing n2 (set operations)
-            string opposite = n1.GetOppositeDirection(key);
+            string opposite = data.GetOppositeDirection(key);
             foreach (string idx in n1.valid_neighbors[key])
             {
-                CustomNodeScriptable neighbor = data.FindNode("_" +idx);
+                CustomNodeScriptable neighbor = data.FindNode(idx);
                 neighbor.valid_neighbors[opposite].Remove(n2.idx);
                 neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
             }
@@ -309,10 +273,10 @@ public class OctTreeFast : MonoBehaviour
             n1.invalid_neighbors[key].RemoveAll(s => s == n2.idx);
 
             // update the neighbors by adding n1 and removing n2 (set operations)
-            string opposite = n1.GetOppositeDirection(key);
+            string opposite = data.GetOppositeDirection(key);
             foreach (string idx in n1.invalid_neighbors[key])
             {
-                CustomNodeScriptable neighbor = data.FindNode("_" + idx);
+                CustomNodeScriptable neighbor = data.FindNode(idx);
                 neighbor.invalid_neighbors[opposite].Remove(n2.idx);
                 neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
             }
@@ -337,39 +301,40 @@ public class OctTreeFast : MonoBehaviour
         }
         // update the valid or invalid stack and destroy n2
         if (n1.tag == "Valid")
-            data.validNodes.Remove(n2.name);
+            data.validNodes.Remove(n2.idx);
         else
-            data.invalidNodes.Remove(n2.name);
+            data.invalidNodes.Remove(n2.idx);
     }
 
 
     public void BuildGraph()
     {
+        data.nodes = new Dictionary<string, CustomNodeScriptable>();
         foreach (CustomNodeScriptable cn in data.validNodes.Values)
         {
             Dictionary<(string, string), CustomNodeScriptable> new_transitions = new Dictionary<(string, string), CustomNodeScriptable>();
             Dictionary<string, List<string>> neighbors = cn.valid_neighbors;
-            foreach (string key in new string[] { "up", "down", "left", "right", "forward", "backward" })
+            foreach (string key in directions)
             {
                 foreach (string neigh_idx in neighbors[key])
                 {
                     // if the neighbor is valid
-                    if (data.validNodes.ContainsKey("_"+neigh_idx))
+                    if (data.validNodes.ContainsKey(neigh_idx))
                     {
-                        CustomNodeScriptable neigh_ = data.validNodes["_" + neigh_idx];
+                        CustomNodeScriptable neigh_ = data.validNodes[neigh_idx];
                         // add a transition node at the center of the connecting surface
                         CustomNodeScriptable transition = ScriptableObject.CreateInstance<CustomNodeScriptable>();
-                        string name = neigh_.name + "&" + cn.name;
-                        if (data.nodes.ContainsKey(name))
+                        string idx = neigh_.idx + "&" + cn.idx;
+                        if (data.nodes.ContainsKey(idx))
                         {
-                            transition = data.nodes[name];
-                            new_transitions[(neigh_.name, cn.name)] = transition;
+                            transition = data.nodes[idx];
+                            new_transitions[(neigh_.idx, cn.idx)] = transition;
                         }
 
                         else
                         {
-                            transition.name = cn.name + "&" + neigh_.name;
-                            transition.idx = cn.name + "&" + neigh_.name;
+                            transition.name = cn.idx + "&" + neigh_.idx;
+                            transition.idx = cn.idx + "&" + neigh_.idx;
                             Vector3 cn_pos = cn.position;
                             Vector3 neigh_pos = neigh_.position;
                             transition.position = new Vector3(
@@ -382,27 +347,28 @@ public class OctTreeFast : MonoBehaviour
                                 Mathf.Min(cn.position.y + cn.scale.y / 2, neigh_.position.y + neigh_.scale.y / 2) - Mathf.Max(cn.position.y - cn.scale.y / 2, neigh_.position.y - neigh_.scale.y / 2),
                                 Mathf.Min(cn.position.z + cn.scale.z / 2, neigh_.position.z + neigh_.scale.z / 2) - Mathf.Max(cn.position.z - cn.scale.z / 2, neigh_.position.z - neigh_.scale.z / 2));
 
-                            new_transitions[(cn.name, neigh_.name)] = transition;
-                            data.nodes[transition.name] = transition;
+                            new_transitions[(cn.idx, neigh_.idx)] = transition;
+                            data.nodes[transition.idx] = transition;
                         }
                     }
                 }
             }
             foreach (var key1 in new_transitions.Keys)
             {
-                string name = key1.Item1 + "&" + key1.Item2;
+                string idx = key1.Item1 + "&" + key1.Item2;
                 // make sure to not add the same transition point twice
-                if (!data.nodes.ContainsKey(name))
+                if (!data.nodes.ContainsKey(idx))
                 {
-                    name = key1.Item2 + "&" + key1.Item1;
+                    idx = key1.Item2 + "&" + key1.Item1;
                 }
-                CustomNodeScriptable t1 = data.nodes[name];
+                CustomNodeScriptable t1 = data.nodes[idx];
                 foreach (var key2 in new_transitions.Keys)
                 {
                     if (key1 != key2)
                     {
                         CustomNodeScriptable t2 = new_transitions[key2];
                         t1.edges.Add((t2.idx, Vector3.Distance(t1.position, t2.position)));
+                        //Debug.Log("edge" + t1.name + " " + t2.name);
                     }
                 }
             }
@@ -423,11 +389,132 @@ public class OctTreeFast : MonoBehaviour
     {
         foreach (CustomNodeScriptable cn in nodeList)
         {
-            if (cn.name == idx)
+            if (cn.idx == idx)
                 return true;
         }
         return false;
     }
 
+    public void UpdateOctTree()
+    {
+        t0 = Time.realtimeSinceStartupAsDouble;
+        // iterate over all nodes
+        // if valid -> invalid, split + update neighbors
+        CollisionCheck coll = GetComponent<CollisionCheck>();
+        bool changed = false;
+        to_split = new List<CustomNodeScriptable>();
+        foreach (CustomNodeScriptable cv in data.validNodes.Values)
+        {
+            if (!coll.IsEmpty(cv.position, cv.scale))
+            {
+                changed = true;
+                to_split.Add(cv);
+            }
+        }
+        while (to_split.Count > 0)
+        {
+            var node = to_split[0];
+            to_split.Remove(to_split.First());
+            SplitNode(node);
+        }
+        // if invalid -> valid, try to restore the parent node
+        List<CustomNodeScriptable> to_repair = new List<CustomNodeScriptable>();
+        foreach (CustomNodeScriptable ci in data.invalidNodes.Values)
+        {
+            if (coll.IsEmpty(ci.position, ci.scale))
+            {
+                changed = true;
+                to_repair.Add(ci);
+            }
+        }
+        foreach (CustomNodeScriptable ci in to_repair)
+            RepairNode(ci);
+        // if the octtree has been updated, update the graph and recompute the path
+        if (changed)
+        {
+            // update the graph: recompute it all or find a local update method
+            BuildGraph();
+            AstarFast path_finder = GetComponent<AstarFast>();
+            if (!path_finder.read_from_file)
+            {
+                path_finder.RecomputePath();
+            }
+            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+
+        }
+    }
+
+    public void RepairNode(CustomNodeScriptable node)
+    {
+        // transform the invalid node into a valid node, updating its neighbors
+        ChangeType(node, "Invalid", "Valid");
+        data.UpdateNeighborsOnValid(node);
+        // try merging it with its neighbors if all children nodes are valid
+        CustomNodeScriptable parent = data.FindNode(node.parent);
+        // if the parent was already repaired or we are at the root, quit
+        if (parent == null || parent.tag == "Valid")
+            return;
+        bool merge = true;
+        while (merge)
+        {
+            foreach (string child_idx in parent.children)
+            {
+                CustomNodeScriptable child = data.FindNode(child_idx);
+                if (child.tag == "Invalid" || child.tag == "Node")
+                    merge = false;
+            }
+            if (merge)
+            {
+                data.UpdateNeighborsOnMerge(parent);
+
+                foreach (string child_idx in parent.children)
+                {
+                    CustomNodeScriptable child = data.FindNode(child_idx);
+                    data.validNodes.Remove(child.idx);
+                    DestroyImmediate(child);
+                }
+                ChangeType(parent, "Node", "Valid");
+            }
+            node = parent;
+            if (node.parent != null)
+                parent = data.FindNode(node.parent);
+            else
+                // we reached the root node
+                merge = false;
+        }
+
+    }
+
+    public void ChangeType(CustomNodeScriptable cn, string old_type, string new_type)
+    {
+        // change the type of an octTree cell between "Node", "Valid" and "Invalid"
+        if (new_type == "Valid")
+        {
+            cn.tag = "Valid";
+            data.validNodes[cn.idx] = cn;
+            if (old_type == "Invalid")
+                data.invalidNodes.Remove(cn.idx);
+            else if (old_type == "Node")
+                data.cells.Remove(cn.idx);
+        }
+        else if (new_type == "Invalid")
+        {
+            cn.tag = "Invalid";
+            data.invalidNodes[cn.idx] = cn;
+            if (old_type == "Valid")
+                data.validNodes.Remove(cn.idx);
+            else if (old_type == "Node")
+                data.cells.Remove(cn.idx);
+        }
+        else
+        {
+            cn.tag = "Node";
+            data.cells[cn.idx] = cn;
+            if (old_type == "Valid")
+                data.validNodes.Remove(cn.idx);
+            else if (old_type == "Invalid")
+                data.invalidNodes.Remove(cn.idx);
+        }
+    }
 }
 

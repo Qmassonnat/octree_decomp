@@ -13,7 +13,6 @@ public class OctTree : MonoBehaviour
     public float zBound;
     public float elongated_criteria; // 0 for no merging, high values for aggressive merging
     private string task;
-    private float currentScale;
     private List<GameObject> to_split;
     private List<CustomNode> validNodes = new List<CustomNode> { };
     private List<CustomNode> invalidNodes = new List<CustomNode> { };
@@ -45,55 +44,50 @@ public class OctTree : MonoBehaviour
             { "backward", new List<string>{ } }}
         );
         task = "build";
-        currentScale = Mathf.Min(2 * bound, zBound);
         directions = new string[] { "up", "down", "left", "right", "forward", "backward" };
     }
 
     // Update is called once per frame
     void Update()
     {
-            if (task == "build" || currentScale >= minSize/2)
+        if (task == "build")
         {
-            currentScale /= 2;
-            List<GameObject> to_split_copy = new List<GameObject>();
-            foreach (GameObject node in to_split)
-                to_split_copy.Add(node);
-            to_split = new List<GameObject>();
-            foreach (GameObject node in to_split_copy)
+            while (to_split.Count > 0)
+            {
+                var node = to_split[0];
+                to_split.Remove(to_split.First());
                 SplitNode(node);
+            }
             task = "prune";
+        }
+        else if (task == "prune")
+        {
+            Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            t0 = Time.realtimeSinceStartupAsDouble;
+            Debug.Log("Before pruning: " + validNodes.Count + " valid nodes " + invalidNodes.Count + " invalid nodes");
+            if (elongated_criteria > 0)
+            {
+                PruneOctTree(validNodes, invalidNodes);
+                Debug.Log("After pruning: " + validNodes.Count + " valid nodes " + invalidNodes.Count + " invalid nodes");
+                Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            }
+            task = "graph";
+        }
+
+        else if (task == "graph")
+        {
+                
+            t0 = Time.realtimeSinceStartupAsDouble;
+            task = "finished";
+            gameObject.tag = "Finished";
+            BuildGraph();
+            Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
         else
         {
-            if (task == "prune")
-            {
-                Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-                t0 = Time.realtimeSinceStartupAsDouble;
-                Debug.Log("Before pruning: " + validNodes.Count + " valid nodes " + invalidNodes.Count + " invalid nodes");
-                if (elongated_criteria > 0)
-                {
-                    PruneOctTree(validNodes, invalidNodes);
-                    Debug.Log("After pruning: " + validNodes.Count + " valid nodes " + invalidNodes.Count + " invalid nodes");
-                    Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-                }
-                task = "graph";
-            }
-
-            else if (task == "graph")
-            {
-                
-                t0 = Time.realtimeSinceStartupAsDouble;
-                task = "finished";
-                gameObject.tag = "Finished";
-                BuildGraph();
-                Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            }
-            else
-            {
-                //t0 = Time.realtimeSinceStartupAsDouble;
-                UpdateOctTree();
-                //Debug.Log("OctTree updated in  " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            }
+            //t0 = Time.realtimeSinceStartupAsDouble;
+            UpdateOctTree();
+            //Debug.Log("OctTree updated in  " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
     }
 
@@ -334,6 +328,7 @@ public class OctTree : MonoBehaviour
                     {
                         // add a transition node at the center of the connecting surface
                         GameObject g = new GameObject();
+                        g.name = cn.name + "&" + neigh_.name;
                         g.AddComponent<CustomNode>();
                         g.transform.parent = empty.transform;
                         CustomNode transition = g.GetComponent<CustomNode>();
@@ -345,6 +340,7 @@ public class OctTree : MonoBehaviour
                                 (Mathf.Max(cn_pos.y - cn.transform.lossyScale.y / 2, neigh_pos.y - neigh_.transform.lossyScale.y / 2) + Mathf.Min(cn_pos.y + cn.transform.lossyScale.y / 2, neigh_pos.y + neigh_.transform.lossyScale.y / 2)) / 2,
                                 (Mathf.Max(cn_pos.z - cn.transform.lossyScale.z / 2, neigh_pos.z - neigh_.transform.lossyScale.z / 2) + Mathf.Min(cn_pos.z + cn.transform.lossyScale.z / 2, neigh_pos.z + neigh_.transform.lossyScale.z / 2)) / 2);
                         new_transitions[(cn.name, neigh_.name)] = transition;
+                        
                     }
                 }
             }
@@ -356,6 +352,7 @@ public class OctTree : MonoBehaviour
                 {
                     transitions[key1] = t1;
                     script.nodes[t1.idx] = t1;
+                    Debug.Log(t1.name);
                     script.edges[t1.idx] = new List<(string, float)>();
                 }
                 else
@@ -365,7 +362,8 @@ public class OctTree : MonoBehaviour
                     if (key1 != key2)
                     {
                         CustomNode t2 = new_transitions[key2];
-                        script.edges[t1.idx].Add((t2.idx, Vector3.Distance(t1.position, t2.position)));        
+                        script.edges[t1.idx].Add((t2.idx, Vector3.Distance(t1.position, t2.position)));
+                        //Debug.Log("edge" + t1.name + " " + t2.name);
                     }
                 }
 
@@ -408,13 +406,13 @@ public class OctTree : MonoBehaviour
                 SplitNode(gv);
             }
         }
-        List<GameObject> to_split_copy = new List<GameObject>();
-        foreach (GameObject node in to_split)
-            to_split_copy.Add(node);
-        to_split = new List<GameObject>();
-        foreach (GameObject node in to_split_copy)
+        while (to_split.Count > 0)
+        {
+            var node = to_split[0];
+            to_split.Remove(to_split.First());
             SplitNode(node);
-
+        }
+        // if invalid -> valid, try to restore the parent node
         foreach (GameObject gi in GameObject.FindGameObjectsWithTag("Invalid"))
         {
             CustomNode ci = gi.GetComponent<CustomNode>();
@@ -460,6 +458,8 @@ public class OctTree : MonoBehaviour
                 if (child.CompareTag("Invalid") || child.CompareTag("Node"))
                     merge = false;
             }
+            //elongated_criteria = 99;
+            //PruneOctTree(new List<CustomNode> {cn }, new List<CustomNode>());
             if (merge)
             {
                 cn.UpdateNeighborsOnMerge(parent);

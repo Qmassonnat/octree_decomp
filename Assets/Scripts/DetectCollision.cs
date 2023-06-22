@@ -13,8 +13,6 @@ public class DetectCollision : MonoBehaviour
             GameObject octTreeGenerator = GameObject.Find("PathFinding");
             if (octTreeGenerator.GetComponent<OctTree>().enabled)
                 octTreeGenerator.GetComponent<OctTree>().SplitNode(gameObject);
-            else if (octTreeGenerator.GetComponent<OctTreeFast>().enabled)
-                octTreeGenerator.GetComponent<OctTreeFast>().SplitNode(gameObject);
             else
                 Debug.LogError("Please activate the script OctTree or OctTreeFast");
         }

@@ -74,7 +74,7 @@ public class AstarFast : MonoBehaviour
         OctTreeFast octTreeGenerator = gameObject.GetComponent<OctTreeFast>();
         Vector3 position = new Vector3(0, octTreeGenerator.zBound / 2, 0);
         Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound/2, octTreeGenerator.bound);
-        string idx = "_0";
+        string idx = "0";
         string merged_idx = "";
         int n = 100;
         while (n>0 && !data.validNodes.ContainsKey(merged_idx))
@@ -113,10 +113,10 @@ public class AstarFast : MonoBehaviour
             foreach (string neigh_idx in cn.valid_neighbors[key])
             {
                 string trans_idx = "";
-                if (data.nodes.ContainsKey("_" + cn.idx + "&" +"_"+ neigh_idx))
-                    trans_idx = "_" + cn.idx + "&" + "_" + neigh_idx;
-                else if (data.nodes.ContainsKey("_" + neigh_idx + "&" + "_" + cn.idx))
-                    trans_idx = "_" + neigh_idx + "&" + "_" + cn.idx;
+                if (data.nodes.ContainsKey(cn.idx + "&" + neigh_idx))
+                    trans_idx = cn.idx + "&" + neigh_idx;
+                else if (data.nodes.ContainsKey(neigh_idx + "&" + cn.idx))
+                    trans_idx = neigh_idx + "&" + cn.idx;
                 if (trans_idx != "")
                 {
                     data.nodes[trans_idx].edges.Add((temp_node.idx, Vector3.Distance(data.nodes[trans_idx].position, temp_node.position)));
@@ -215,6 +215,7 @@ public class AstarFast : MonoBehaviour
             prioQueue = prioQueue.OrderBy(Heuristic).ToList();
             var node = prioQueue.First();
             prioQueue.Remove(node);
+            //Debug.Log("expanding" + node.name);
             foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
             {
                 CustomNodeScriptable childNode;
@@ -238,7 +239,7 @@ public class AstarFast : MonoBehaviour
             }
             node.visited = true;
             nb_visited += 1;
-            if (node.name == targetNode.name)
+            if (node.idx == targetNode.idx)
                 return;
         } while (prioQueue.Any());
     }
@@ -404,6 +405,16 @@ public class AstarFast : MonoBehaviour
         foreach (double x in li)
             sumOfSquares += Math.Pow((x - avg), 2.0);
         return (avg, sumOfSquares / (double)(li.Count - 1));
+    }
+
+    public void RecomputePath()
+    {
+        if (draw)
+        {
+            while (drawPath.transform.childCount > 0)
+                DestroyImmediate(drawPath.transform.GetChild(0).gameObject);
+        }
+        var (nb_visited, path_length, dt) = A_star_path(start, target);
     }
 
 }

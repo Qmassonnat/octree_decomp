@@ -19,6 +19,8 @@ public class CustomNodeScriptable : ScriptableObject
     [HideInInspector] public List<string> invalid_neigh_right = new List<string>();
     [HideInInspector] public List<string> invalid_neigh_back = new List<string>();
     [HideInInspector] public List<string> invalid_neigh_forth = new List<string>();
+    public string parent;
+    public List<string> children = new List<string>();
     public float dist_to_goal;
     public float cost_to_start;
     public CustomNodeScriptable nearest_to_start;
@@ -40,29 +42,18 @@ public class CustomNodeScriptable : ScriptableObject
         nearest_to_start = null;
     }
 
-   
-
-    public string GetOppositeDirection(string direction)
+    public void AddValidNeighbors(string key, List<string> new_neighbors)
     {
-        string res = "";
-        if (direction.Equals("up"))
-            res = "down";
-        if (direction.Equals("down"))
-            res = "up";
-        if (direction.Equals("left"))
-            res = "right";
-        if (direction.Equals("right"))
-            res = "left";
-        if (direction.Equals("forward"))
-            res = "backward";
-        if (direction.Equals("backward"))
-            res = "forward";
-        return res;
+        foreach (string new_neighbor in new_neighbors)
+            valid_neighbors[key].Add(new_neighbor);
     }
 
-
-
-
+    public void AddInvalidNeighbors(string key, List<string> new_neighbors)
+    {
+        foreach (string new_neighbor in new_neighbors)
+            invalid_neighbors[key].Add(new_neighbor);
+    }
+       
     public void SaveNeighbors()
     {
         valid_neigh_up = valid_neighbors["up"];
