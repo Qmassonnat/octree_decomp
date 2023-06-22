@@ -185,10 +185,12 @@ public class OctTreeFast : MonoBehaviour
         while (validStack.Count > 0)
         {
             CustomNodeScriptable n1 = (CustomNodeScriptable)validStack.Pop();
+            if (n1 == null)
+                continue;
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.valid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.idx))
+                if (n1.valid_neighbors[key].Count == 1 && n1.invalid_neighbors[key].Count == 0 && !data.deletedNodes.ContainsKey(n1.idx))
                 {
                     CustomNodeScriptable n2 = data.FindNode(n1.valid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
@@ -201,10 +203,10 @@ public class OctTreeFast : MonoBehaviour
                         elongated = n1.scale.x + n2.scale.x > elongated_criteria * Mathf.Min(n1.scale.y, n1.scale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.scale.z + n2.scale.z > elongated_criteria * Mathf.Min(n1.scale.x, n1.scale.y);
-                    if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && n2.invalid_neighbors[opposite].Count == 0 && !elongated)
                     {
-                        MergeNeighbors(n1, n2, key);
                         data.deletedNodes[n2.idx] = n1.idx;
+                        MergeNeighbors(n1, n2, key);
                         // add n1 again to check if this merge enabled further merges
                         validStack.Push(n1);
                         break;
@@ -215,10 +217,12 @@ public class OctTreeFast : MonoBehaviour
         while (invalidStack.Count > 0)
         {
             CustomNodeScriptable n1 = (CustomNodeScriptable)invalidStack.Pop();
+            if (n1 == null)
+                continue;
             foreach (string key in directions)
             {
                 // if n1 only has 1 neighbor n2 and n1 has not already been merged
-                if (n1.invalid_neighbors[key].Count == 1 && !data.deletedNodes.ContainsKey(n1.idx))
+                if (n1.invalid_neighbors[key].Count == 1 && n1.valid_neighbors[key].Count == 0 && !data.deletedNodes.ContainsKey(n1.idx))
                 {
                     CustomNodeScriptable n2 = data.FindNode(n1.invalid_neighbors[key][0]);
                     // if n2 is valid and only has n1 as neighbor on the opposite direction merge them
@@ -231,10 +235,10 @@ public class OctTreeFast : MonoBehaviour
                         elongated = n1.scale.x + n2.scale.x > elongated_criteria * Mathf.Min(n1.scale.y, n1.scale.z);
                     if (key == "forward" || key == "backward")
                         elongated = n1.scale.z + n2.scale.z > elongated_criteria * Mathf.Min(n1.scale.x, n1.scale.y);
-                    if (n2.tag == "Invalid" && n2.invalid_neighbors[opposite].Count == 1 && !elongated)
+                    if (n2.tag == "Invalid" && n2.invalid_neighbors[opposite].Count == 1 && n2.valid_neighbors[opposite].Count == 0 && !elongated)
                     {
-                        MergeNeighbors(n1, n2, key);
                         data.deletedNodes[n2.idx] = n1.idx;
+                        MergeNeighbors(n1, n2, key);
                         // add n1 again to check if this merge enabled further merges
                         invalidStack.Push(n1);
                         break;
@@ -248,6 +252,7 @@ public class OctTreeFast : MonoBehaviour
 
     public void MergeNeighbors(CustomNodeScriptable n1, CustomNodeScriptable n2, string direction)
     {
+        Debug.Log("merging" + n1.name + n2.name);
         foreach (string key in directions) {
             // add the neighbors of n2 to those of n1
             n1.valid_neighbors[key] = n1.valid_neighbors[key].Union(n2.valid_neighbors[key]).ToList();
@@ -260,8 +265,18 @@ public class OctTreeFast : MonoBehaviour
             foreach (string idx in n1.valid_neighbors[key])
             {
                 CustomNodeScriptable neighbor = data.FindNode(idx);
-                neighbor.valid_neighbors[opposite].Remove(n2.idx);
-                neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                if (n1.tag == "Valid")
+                {
+                    neighbor.valid_neighbors[opposite].Remove(n2.idx);
+                    neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                }
+                else if (n1.tag == "Invalid")
+                {
+                    neighbor.invalid_neighbors[opposite].Remove(n2.idx);
+                    neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                }
+                else
+                    Debug.LogError(n1.tag);
             }
         }
         foreach (string key in directions)
@@ -277,8 +292,16 @@ public class OctTreeFast : MonoBehaviour
             foreach (string idx in n1.invalid_neighbors[key])
             {
                 CustomNodeScriptable neighbor = data.FindNode(idx);
-                neighbor.invalid_neighbors[opposite].Remove(n2.idx);
-                neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                if (n1.tag == "Valid")
+                {
+                    neighbor.valid_neighbors[opposite].Remove(n2.idx);
+                    neighbor.valid_neighbors[opposite] = neighbor.valid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                }
+                else if (n1.tag == "Invalid")
+                {
+                    neighbor.invalid_neighbors[opposite].Remove(n2.idx);
+                    neighbor.invalid_neighbors[opposite] = neighbor.invalid_neighbors[opposite].Union(new List<string> { n1.idx }).ToList();
+                }
             }
         }
 
