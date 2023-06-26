@@ -15,6 +15,8 @@ public class OctTreeFast : MonoBehaviour
     public bool load;
     [HideInInspector] public NodeData data;
     private List<CustomNodeScriptable> to_split;
+    private List<(string, string)> transitions_add = new List<(string, string)>();
+    private List<(string, string)> transitions_remove = new List<(string, string)>();
     private string task;
     private double t0;
     private string[] directions;
@@ -90,9 +92,9 @@ public class OctTreeFast : MonoBehaviour
         else if (task == "graph")
         {
             t0 = Time.realtimeSinceStartupAsDouble;
+            BuildGraph();
             task = "finished";
             gameObject.tag = "Finished";
-            BuildGraph();
             Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
         else
@@ -112,7 +114,8 @@ public class OctTreeFast : MonoBehaviour
         if (parent)
         {
             new_node.parent = parent.idx;
-            parent.children.Add(idx);
+            if (!parent.children.Contains(idx))
+                parent.children.Add(idx);
         }
 
         new_node.idx = idx;
@@ -126,8 +129,17 @@ public class OctTreeFast : MonoBehaviour
         {
             to_split.Add(new_node);
         }
+        else
+        {
+            // if the node is valid, update the graph
+            foreach (KeyValuePair<string, List<string>> entry in new_node.valid_neighbors)
+            {
+                // add the transitions between the new node and its neighbors
+                foreach (string neigh in entry.Value)
+                    transitions_add.Add((new_node.idx, neigh));
+            }
+        }
     }
-
 
     public void SplitNode(CustomNodeScriptable node_)
     {
@@ -139,6 +151,12 @@ public class OctTreeFast : MonoBehaviour
         Vector3 current_scale = node_.scale;
         if (current_scale.x > minSize)
         {
+            foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
+            {
+                // remove the transitions between the split node and its neighbors
+                foreach (string neigh in entry.Value)
+                    transitions_remove.Add((node_.idx, neigh));
+            }
             Vector3[] new_centers = new Vector3[8];
             Vector3 center = node_.position;
 
@@ -160,11 +178,17 @@ public class OctTreeFast : MonoBehaviour
                 BuildOctree(new_centers[i], new_scale, node_, node_.idx+i.ToString(), new_valid_neighbors, new_invalid_neighbors);
             }
         }
-        // if the leaf has not already been added
-        else if (!data.invalidNodes.ContainsKey(node_.idx))
+        // if  we reached the minimum size, make the node invalid
+        else
         {
             data.UpdateNeighborsOnInvalid(node_);
             ChangeType(node_, "Node", "Invalid");
+            foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
+            {
+                // remove the transitions between the invalid node and its neighbors
+                foreach (string neigh in entry.Value)
+                    transitions_remove.Add((node_.idx, neigh));
+            }
         }
     }
 
@@ -248,8 +272,6 @@ public class OctTreeFast : MonoBehaviour
         } 
     }
 
-
-
     public void MergeNeighbors(CustomNodeScriptable n1, CustomNodeScriptable n2, string direction)
     {
         Debug.Log("merging" + n1.name + n2.name);
@@ -329,12 +351,12 @@ public class OctTreeFast : MonoBehaviour
             data.invalidNodes.Remove(n2.idx);
     }
 
-
     public void BuildGraph()
     {
         data.nodes = new Dictionary<string, CustomNodeScriptable>();
         foreach (CustomNodeScriptable cn in data.validNodes.Values)
         {
+            // create all transitions between cn and its valid neighbors
             Dictionary<(string, string), CustomNodeScriptable> new_transitions = new Dictionary<(string, string), CustomNodeScriptable>();
             Dictionary<string, List<string>> neighbors = cn.valid_neighbors;
             foreach (string key in directions)
@@ -346,33 +368,9 @@ public class OctTreeFast : MonoBehaviour
                     {
                         CustomNodeScriptable neigh_ = data.validNodes[neigh_idx];
                         // add a transition node at the center of the connecting surface
-                        CustomNodeScriptable transition = ScriptableObject.CreateInstance<CustomNodeScriptable>();
-                        string idx = neigh_.idx + "&" + cn.idx;
-                        if (data.nodes.ContainsKey(idx))
-                        {
-                            transition = data.nodes[idx];
-                            new_transitions[(neigh_.idx, cn.idx)] = transition;
-                        }
-
-                        else
-                        {
-                            transition.name = cn.idx + "&" + neigh_.idx;
-                            transition.idx = cn.idx + "&" + neigh_.idx;
-                            Vector3 cn_pos = cn.position;
-                            Vector3 neigh_pos = neigh_.position;
-                            transition.position = new Vector3(
-                                    (Mathf.Max(cn.position.x - cn.scale.x / 2, neigh_.position.x - neigh_.scale.x / 2) + Mathf.Min(cn_pos.x + cn.scale.x / 2, neigh_.position.x + neigh_.scale.x / 2)) / 2,
-                                    (Mathf.Max(cn.position.y - cn.scale.y / 2, neigh_.position.y - neigh_.scale.y / 2) + Mathf.Min(cn_pos.y + cn.scale.y / 2, neigh_.position.y + neigh_.scale.y / 2)) / 2,
-                                    (Mathf.Max(cn.position.z - cn.scale.z / 2, neigh_.position.z - neigh_.scale.z / 2) + Mathf.Min(cn_pos.z + cn.scale.z / 2, neigh_.position.z + neigh_.scale.z / 2)) / 2);
-                            // we use scale to store the size of the connecting surface
-                            transition.scale = new Vector3(
-                                Mathf.Min(cn.position.x + cn.scale.x / 2, neigh_.position.x + neigh_.scale.x / 2) - Mathf.Max(cn.position.x - cn.scale.x / 2, neigh_.position.x - neigh_.scale.x / 2),
-                                Mathf.Min(cn.position.y + cn.scale.y / 2, neigh_.position.y + neigh_.scale.y / 2) - Mathf.Max(cn.position.y - cn.scale.y / 2, neigh_.position.y - neigh_.scale.y / 2),
-                                Mathf.Min(cn.position.z + cn.scale.z / 2, neigh_.position.z + neigh_.scale.z / 2) - Mathf.Max(cn.position.z - cn.scale.z / 2, neigh_.position.z - neigh_.scale.z / 2));
-
-                            new_transitions[(cn.idx, neigh_.idx)] = transition;
-                            data.nodes[transition.idx] = transition;
-                        }
+                        var (transition, trans_idx) = CreateTransition(cn, neigh_);
+                        new_transitions[trans_idx] = transition;
+                        data.nodes[transition.idx] = transition;
                     }
                 }
             }
@@ -391,11 +389,116 @@ public class OctTreeFast : MonoBehaviour
                     {
                         CustomNodeScriptable t2 = new_transitions[key2];
                         t1.edges.Add((t2.idx, Vector3.Distance(t1.position, t2.position)));
-                        //Debug.Log("edge" + t1.name + " " + t2.name);
                     }
                 }
             }
         }
+    }
+
+    public (CustomNodeScriptable, (string, string)) CreateTransition (CustomNodeScriptable n1, CustomNodeScriptable n2)
+    {
+        CustomNodeScriptable transition = ScriptableObject.CreateInstance<CustomNodeScriptable>();
+        (string, string) trans_idx;
+        string idx = n2.idx + "&" + n1.idx;
+        if (data.nodes.ContainsKey(idx))
+        {
+            transition = data.nodes[idx];
+            trans_idx = (n2.idx, n1.idx);
+        }
+
+        else
+        {
+            trans_idx = (n1.idx, n2.idx);
+            transition.name = n1.idx + "&" + n2.idx;
+            transition.idx = n1.idx + "&" + n2.idx;
+            Vector3 cn_pos = n1.position;
+            Vector3 neigh_pos = n2.position;
+            transition.position = new Vector3(
+                    (Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2) + Mathf.Min(cn_pos.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2)) / 2,
+                    (Mathf.Max(n1.position.y - n1.scale.y / 2, n2.position.y - n2.scale.y / 2) + Mathf.Min(cn_pos.y + n1.scale.y / 2, n2.position.y + n2.scale.y / 2)) / 2,
+                    (Mathf.Max(n1.position.z - n1.scale.z / 2, n2.position.z - n2.scale.z / 2) + Mathf.Min(cn_pos.z + n1.scale.z / 2, n2.position.z + n2.scale.z / 2)) / 2);
+            // we use scale to store the size of the connecting surface
+            transition.scale = new Vector3(
+                Mathf.Min(n1.position.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2) - Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2),
+                Mathf.Min(n1.position.y + n1.scale.y / 2, n2.position.y + n2.scale.y / 2) - Mathf.Max(n1.position.y - n1.scale.y / 2, n2.position.y - n2.scale.y / 2),
+                Mathf.Min(n1.position.z + n1.scale.z / 2, n2.position.z + n2.scale.z / 2) - Mathf.Max(n1.position.z - n1.scale.z / 2, n2.position.z - n2.scale.z / 2));
+        }
+        // add the edges from and to that transition
+        if (task == "finished" && !data.nodes.ContainsKey(transition.idx))
+        {
+            // the transitions are with the valid neighbors of n1 and n2
+            List<string> edges_to_add = new List<string>();
+            foreach (KeyValuePair<string, List<string>> entry in n1.valid_neighbors)
+            {
+                foreach (string neigh_idx in entry.Value)
+                {
+                    if (data.nodes.ContainsKey(n1.idx + "&" + neigh_idx))
+                        edges_to_add.Add(n1.idx + "&" + neigh_idx);
+                    else if (data.nodes.ContainsKey(neigh_idx + "&" + n1.idx))
+                        edges_to_add.Add(neigh_idx + "&" + n1.idx);
+                }
+            }
+            foreach (KeyValuePair<string, List<string>> entry in n2.valid_neighbors)
+            {
+                foreach (string neigh_idx in entry.Value)
+                {
+                    if (data.nodes.ContainsKey(n2.idx + "&" + neigh_idx))
+                        edges_to_add.Add(n2.idx + "&" + neigh_idx);
+                    else if (data.nodes.ContainsKey(neigh_idx + "&" + n2.idx))
+                        edges_to_add.Add(neigh_idx + "&" + n2.idx);
+                }
+            }
+            foreach (string other_idx in edges_to_add)
+            {
+                CustomNodeScriptable other_tr = data.nodes[other_idx];
+                if (!other_tr.edges.Contains((transition.idx, Vector3.Distance(transition.position, other_tr.position)))) {
+                    transition.edges.Add((other_tr.idx, Vector3.Distance(transition.position, other_tr.position)));
+                    other_tr.edges.Add((transition.idx, Vector3.Distance(transition.position, other_tr.position)));
+                }
+            }
+        }
+        return (transition, trans_idx);
+    }
+
+
+    public void RemoveTransition(string cn1_idx, string cn2_idx)
+    {
+        // delete the transition and the edges pointing to it
+        string tr_idx = cn1_idx + "&" + cn2_idx;
+        if (!data.nodes.ContainsKey(tr_idx))
+            // if the transition is stored as c2_idx&c1_idx
+            tr_idx = cn2_idx + "&" + cn1_idx;
+        if (data.nodes.ContainsKey(tr_idx))
+        {
+            CustomNodeScriptable transition = data.nodes[tr_idx];
+            foreach (var edge in transition.edges)
+            {
+                CustomNodeScriptable neigh = data.nodes[edge.Item1];
+                var back_edge = (tr_idx, edge.Item2);
+                neigh.edges.Remove(back_edge);
+            }
+            data.nodes.Remove(tr_idx);
+        }
+    }
+
+    public void UpdateGraph()
+    {
+        // add or remove the appropriate transitions to reflect the change in the octtree
+        foreach (var (cn1_idx, cn2_idx) in transitions_add)
+        {
+            CustomNodeScriptable cn1 = data.FindNode(cn1_idx);
+            CustomNodeScriptable cn2 = data.FindNode(cn2_idx);
+            if (cn1 != null && cn2 != null  && cn1.tag == "Valid" && cn2.tag == "Valid")
+            {
+                var (transition, trans_idx) = CreateTransition(cn1, cn2);
+                data.nodes[transition.idx] = transition;
+            }
+        }
+        foreach (var (cn1_idx, cn2_idx) in transitions_remove)
+        {
+            RemoveTransition(cn1_idx, cn2_idx);
+        } 
+        
     }
 
     // returns the index of the node obtained after merging
@@ -408,18 +511,10 @@ public class OctTreeFast : MonoBehaviour
         return idx;
     }
 
-    public bool Contains(string idx, List<CustomNodeScriptable> nodeList)
-    {
-        foreach (CustomNodeScriptable cn in nodeList)
-        {
-            if (cn.idx == idx)
-                return true;
-        }
-        return false;
-    }
-
     public void UpdateOctTree()
     {
+        transitions_add = new List<(string, string)>();
+        transitions_remove = new List<(string, string)>();
         t0 = Time.realtimeSinceStartupAsDouble;
         // iterate over all nodes
         // if valid -> invalid, split + update neighbors
@@ -455,14 +550,16 @@ public class OctTreeFast : MonoBehaviour
         // if the octtree has been updated, update the graph and recompute the path
         if (changed)
         {
+            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph: recompute it all or find a local update method
-            BuildGraph();
+            UpdateGraph();
             AstarFast path_finder = GetComponent<AstarFast>();
             if (!path_finder.read_from_file)
             {
                 path_finder.RecomputePath();
             }
-            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
 
         }
     }
@@ -471,6 +568,12 @@ public class OctTreeFast : MonoBehaviour
     {
         // transform the invalid node into a valid node, updating its neighbors
         ChangeType(node, "Invalid", "Valid");
+        foreach (KeyValuePair<string, List<string>> entry in node.valid_neighbors)
+        {
+            // add a transition between the now valid node and all of its valid neighbors
+            foreach (string neigh in entry.Value)
+                transitions_add.Add((node.idx, neigh));
+        }
         data.UpdateNeighborsOnValid(node);
         // try merging it with its neighbors if all children nodes are valid
         CustomNodeScriptable parent = data.FindNode(node.parent);
@@ -489,14 +592,26 @@ public class OctTreeFast : MonoBehaviour
             if (merge)
             {
                 data.UpdateNeighborsOnMerge(parent);
-
                 foreach (string child_idx in parent.children)
                 {
                     CustomNodeScriptable child = data.FindNode(child_idx);
+                    // remove all transitions with the child
+                    foreach (KeyValuePair<string, List<string>> entry in child.valid_neighbors)
+                    {
+                        // add a transition between the now valid node and all of its valid neighbors
+                        foreach (string neigh in entry.Value)
+                            transitions_remove.Add((child.idx, neigh));
+                    }
                     data.validNodes.Remove(child.idx);
                     DestroyImmediate(child);
                 }
                 ChangeType(parent, "Node", "Valid");
+                foreach (KeyValuePair<string, List<string>> entry in parent.valid_neighbors)
+                {
+                    // add a transition between the now valid node and all of its valid neighbors
+                    foreach (string neigh in entry.Value)
+                        transitions_add.Add((parent.idx, neigh));
+                }
             }
             node = parent;
             if (node.parent != null)

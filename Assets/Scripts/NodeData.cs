@@ -23,7 +23,7 @@ public class NodeData : ScriptableObject
         else if (invalidNodes.ContainsKey(idx))
             return invalidNodes[idx];
         else
-            Debug.Log("node not found: " + idx);
+            //Debug.Log("node not found: " + idx);
         return null;
     }
 

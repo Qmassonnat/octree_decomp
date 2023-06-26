@@ -245,7 +245,6 @@ public class OctTree : MonoBehaviour
 
     public void MergeNeighbors(CustomNode n1, CustomNode n2, string direction)
     {
-        Debug.Log("merging" + n1.name + n2.name);
         foreach (string key in directions) {
             // add the neighbors of n2 to those of n1
             n1.valid_neighbors[key] = n1.valid_neighbors[key].Union(n2.valid_neighbors[key]).ToList();
@@ -470,7 +469,9 @@ public class OctTree : MonoBehaviour
         // if the parent was already repaired, quit
         if (parent.CompareTag("Valid"))
             return;
-        bool merge = true;
+        elongated_criteria = 99;
+        PruneOctTree(new List<CustomNode> { cn }, new List<CustomNode>());
+        /*bool merge = true;
         while (merge)
         {
             Transform tr = parent.transform;
@@ -480,8 +481,6 @@ public class OctTree : MonoBehaviour
                 if (child.CompareTag("Invalid") || child.CompareTag("Node"))
                     merge = false;
             }
-            //elongated_criteria = 99;
-            //PruneOctTree(new List<CustomNode> {cn }, new List<CustomNode>());
             if (merge)
             {
                 cn.UpdateNeighborsOnMerge(parent);
@@ -498,6 +497,7 @@ public class OctTree : MonoBehaviour
                 // we reached the root node
                 merge = false;
         }
+        */
 
         // make sure neighbors are updated correctly in all scenarios, including when merging children
     }
