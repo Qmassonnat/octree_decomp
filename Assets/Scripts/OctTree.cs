@@ -85,9 +85,11 @@ public class OctTree : MonoBehaviour
         }
         else
         {
-            //t0 = Time.realtimeSinceStartupAsDouble;
-            UpdateOctTree();
-            //Debug.Log("OctTree updated in  " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            if (GameObject.Find("MapGenerator") == null)
+                UpdateOctTree();
+            else
+                // if we test warframe maps remove the obstacle list from memory to speed up Unity
+                gameObject.GetComponent<CollisionCheck>().obstacleList = new List<(Vector3, Vector3)>();
         }
     }
 

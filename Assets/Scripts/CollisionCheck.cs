@@ -4,19 +4,21 @@ using UnityEngine;
 
 public class CollisionCheck : MonoBehaviour
 {
-    private List<(Vector3, Vector3)> obstacleList;
+    [HideInInspector] public List<(Vector3, Vector3)> obstacleList = new List<(Vector3, Vector3)>();
 
     // Start is called before the first frame update
     void Start()
     {
-        UpdateObstacles();
+        // if we test Warframe maps let the MapGenerator script handle obstacles
+        if (GameObject.Find("MapGenerator") == null)
+            UpdateObstacles();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // TODO: update obstacles, maybe once every 5 or 10 frames?
-        UpdateObstacles();
+        if (GameObject.Find("MapGenerator") == null)
+            UpdateObstacles();
     }
 
     void UpdateObstacles()

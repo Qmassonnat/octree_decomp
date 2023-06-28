@@ -20,6 +20,7 @@ public class OctTreeFast : MonoBehaviour
     private string task;
     private double t0;
     private string[] directions;
+    private bool tested = false;
 
     // Start is called before the first frame update
     void Start()
@@ -99,9 +100,13 @@ public class OctTreeFast : MonoBehaviour
         }
         else
         {
-            //t0 = Time.realtimeSinceStartupAsDouble;
-            UpdateOctTree();
-            //Debug.Log("OctTree updated in  " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            if (GameObject.Find("MapGenerator") == null)
+                UpdateOctTree();
+            else if (!tested)
+            {
+                tested = true;
+                GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenario();
+            }
         }
     }
 

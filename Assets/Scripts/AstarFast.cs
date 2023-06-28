@@ -135,7 +135,7 @@ public class AstarFast : MonoBehaviour
         return node.cost_to_start + node.dist_to_goal;
     }
 
-    (int, float, double) A_star_path(Vector3 start, Vector3 target)
+    public (int, float, double) A_star_path(Vector3 start, Vector3 target)
     {
         nb_visited = 0;
         temp_edges = new Dictionary<string, List<(string, float)>>();
