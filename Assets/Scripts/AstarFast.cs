@@ -76,7 +76,7 @@ public class AstarFast : MonoBehaviour
         Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound/2, octTreeGenerator.bound);
         string idx = "0";
         string merged_idx = "";
-        int n = 100;
+        int n = 20;
         while (n>0 && !data.validNodes.ContainsKey(merged_idx))
         {
             n--;
@@ -99,8 +99,8 @@ public class AstarFast : MonoBehaviour
             else
                 position.z -= scale.z;
         }
-        if (n == 0) 
-            Debug.LogError("Error in InsertTempNode");
+        if (n == 0)
+            Debug.LogError("Error in InsertTempNode"); 
         if (temp_node.idx == "start")
             start_idx = idx;
         if (temp_node.idx == "target")
@@ -277,8 +277,8 @@ public class AstarFast : MonoBehaviour
         {
             old_dist += Vector3.Distance(path[i], path[i + 1]);
             Vector3 pos = path[i];
-            bool inter = Physics.Raycast(last, pos - last, Vector3.Distance(pos, last));
-            if (inter)
+            bool visible = IsVisible(last, pos);
+            if (!visible)
             {
                 new_path.Add(path[i+1]);
                 new_dist += Vector3.Distance(path[i+1], last);
@@ -292,6 +292,50 @@ public class AstarFast : MonoBehaviour
         new_path.Reverse();
         //Debug.Log("Before pruning path " + path.Count + " nodes, length " + old_dist + " after pruning " + new_path.Count + " nodes, length " + new_dist);
         return new_path;
+    }
+
+    public bool IsVisible(Vector3 x, Vector3 y)
+    {
+        // returns true iff the straight line between x and y does not intersect an invalid octtree cell
+        //bool visible = !Physics.Raycast(x, y - x, Vector3.Distance(y, x));
+        bool visible = true;
+        float step = gameObject.GetComponent<OctTreeFast>().minSize / 2;
+        float n = Mathf.Floor(Vector3.Distance(x, y) / step);
+        OctTreeFast octTreeGenerator = gameObject.GetComponent<OctTreeFast>();
+        for (int j = 0; j < n; j++)
+        {
+            Vector3 pos = x + j/n * (y - x);
+            Vector3 position = new Vector3(0, octTreeGenerator.zBound / 2, 0);
+            Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound / 2, octTreeGenerator.bound);
+            string idx = "0";
+            string merged_idx = "";
+            int n_iter = 20;
+            while (visible && n_iter > 0 && !data.validNodes.ContainsKey(merged_idx))
+            {
+                n_iter--;
+                int i = 1 * (pos.x > position.x ? 1 : 0) + 2 * (pos.z > position.z ? 1 : 0) + 4 * (pos.y > position.y ? 1 : 0);
+                // Find in which children the argument position is
+                idx = idx + i.ToString();
+                merged_idx = gameObject.GetComponent<OctTreeFast>().FindMergedNode(idx);
+                scale /= 2;
+                // update the position of the candidate node
+                if (pos.x > position.x)
+                    position.x += scale.x;
+                else
+                    position.x -= scale.x;
+                if (pos.y > position.y)
+                    position.y += scale.y;
+                else
+                    position.y -= scale.y;
+                if (pos.z > position.z)
+                    position.z += scale.z;
+                else
+                    position.z -= scale.z;
+            }
+            if (n_iter == 0 || !data.validNodes.ContainsKey(merged_idx))
+                visible = false;
+        }
+        return visible;
     }
 
     public float PathLength(List<Vector3> path)

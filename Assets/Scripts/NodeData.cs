@@ -394,6 +394,9 @@ public class NodeData : ScriptableObject
         {
             if (cn.name != "invalid")
             {
+                //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //g.transform.position = cn.position;
+                //g.transform.localScale = cn.scale;
                 invalidNodes[cn.idx] = cn;
                 cn.LoadNeighbors();
             }

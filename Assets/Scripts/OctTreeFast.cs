@@ -279,7 +279,6 @@ public class OctTreeFast : MonoBehaviour
 
     public void MergeNeighbors(CustomNodeScriptable n1, CustomNodeScriptable n2, string direction)
     {
-        Debug.Log("merging" + n1.name + n2.name);
         foreach (string key in directions) {
             // add the neighbors of n2 to those of n1
             n1.valid_neighbors[key] = n1.valid_neighbors[key].Union(n2.valid_neighbors[key]).ToList();

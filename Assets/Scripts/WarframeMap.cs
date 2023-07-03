@@ -6,11 +6,9 @@ public class WarframeMap : MonoBehaviour
     public GameObject obstacle;
     public string map_name;
     public bool draw;
-    Vector3 map_size;
-    Vector3 min_coord;
-    Vector3 max_coord;
     // TODO compute that offset automatically
-    Vector3 offset = new Vector3(200,50,300);
+    public Vector3 offset;
+    Vector3 map_size;
     GameObject Obstacles;
     // Start is called before the first frame update
     void Start()
@@ -24,14 +22,12 @@ public class WarframeMap : MonoBehaviour
         StreamReader sr = new StreamReader(map_path);
         string s = sr.ReadLine();
         string[] l = s.Split(" ");
-        map_size = new Vector3(float.Parse(l[0]), float.Parse(l[1]), float.Parse(l[2]));
+        map_size = new Vector3(float.Parse(l[1]), float.Parse(l[2]), float.Parse(l[3]));
         s = sr.ReadLine();
         while (s != null)
         {
             string[] li = s.Split(" ");
             Vector3 obstacle_coord = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
-            max_coord = Vector3.Max(max_coord, obstacle_coord);
-            min_coord = Vector3.Min(min_coord, obstacle_coord);
             if (draw)
             {
                 GameObject g = Instantiate(obstacle);
@@ -43,7 +39,6 @@ public class WarframeMap : MonoBehaviour
 
             s = sr.ReadLine();
         }
-       // Debug.Log(map_size + " " + min_coord + " " + max_coord);
     }
 
     public void TestScenario()
@@ -51,7 +46,7 @@ public class WarframeMap : MonoBehaviour
         string test_path = Application.dataPath + "/Warframe/" + map_name + "_paths.txt";
         StreamReader sr = new StreamReader(test_path);
         string s = sr.ReadLine();
-        int cont = 10;
+        int cont = 3;
         AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
         float min = 1000;
         float max = 0;
@@ -60,8 +55,8 @@ public class WarframeMap : MonoBehaviour
             string[] li = s.Split(" ");
             Vector3 start = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
             Vector3 target = new Vector3(float.Parse(li[3]), float.Parse(li[4]), float.Parse(li[5])) - offset;
-            GameObject.Find("Start").transform.position = start;
-            GameObject.Find("Target").transform.position = target;
+            //GameObject.Find("Start").transform.position = start;
+            //GameObject.Find("Target").transform.position = target;
             try
             {
                 var (nb, l, dt) = pf.A_star_path(start, target); 

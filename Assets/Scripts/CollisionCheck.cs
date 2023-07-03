@@ -36,6 +36,7 @@ public class CollisionCheck : MonoBehaviour
                 var P111 = trans.TransformPoint(new Vector3(max.x, max.y, max.z));
                 Vector3 center = (P000 + P111) / 2;
                 Vector3 scale = (P111 - P000);
+                scale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
                 obstacleList.Add((center, scale));
 
             }
@@ -49,9 +50,9 @@ public class CollisionCheck : MonoBehaviour
         Vector3 max1 = center1 + scale1 / 2;
         Vector3 min2 = center2 - scale2 / 2;
         Vector3 max2 = center2 + scale2 / 2;
-        if (((max1.x > min2.x && max1.x < max2.x) || (min1.x > min2.x && min1.x < max2.x) || (max2.x > min1.x && max2.x < max1.x) || (min2.x > min1.x && min2.x < max1.x)) &&
-            ((max1.y > min2.y && max1.y < max2.y) || (min1.y > min2.y && min1.y < max2.y) || (max2.y > min1.y && max2.y < max1.y) || (min2.y > min1.y && min2.y < max1.y)) &&
-            ((max1.z > min2.z && max1.z < max2.z) || (min1.z > min2.z && min1.z < max2.z) || (max2.z > min1.z && max2.z < max1.z) || (min2.z > min1.z && min2.z < max1.z)))
+        if (((max1.x > min2.x && max1.x <= max2.x) || (min1.x >= min2.x && min1.x < max2.x) || (max2.x > min1.x && max2.x <= max1.x) || (min2.x >= min1.x && min2.x < max1.x)) &&
+            ((max1.y > min2.y && max1.y <= max2.y) || (min1.y >= min2.y && min1.y < max2.y) || (max2.y > min1.y && max2.y <= max1.y) || (min2.y >= min1.y && min2.y < max1.y)) &&
+            ((max1.z > min2.z && max1.z <= max2.z) || (min1.z >= min2.z && min1.z < max2.z) || (max2.z > min1.z && max2.z <= max1.z) || (min2.z >= min1.z && min2.z < max1.z)))
             return true;
         return false;
     }

@@ -88,8 +88,11 @@ public class OctTree : MonoBehaviour
             if (GameObject.Find("MapGenerator") == null)
                 UpdateOctTree();
             else
+            {
                 // if we test warframe maps remove the obstacle list from memory to speed up Unity
                 gameObject.GetComponent<CollisionCheck>().obstacleList = new List<(Vector3, Vector3)>();
+                Debug.Log("warframe");
+            }
         }
     }
 
