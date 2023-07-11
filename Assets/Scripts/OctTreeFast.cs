@@ -35,6 +35,7 @@ public class OctTreeFast : MonoBehaviour
             Debug.Log("Loading data from file " + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             task = "finished";
             gameObject.tag = "Finished";
+            Debug.Log(data.nodes.Count + " " + data.validNodes.Count);
         }
         else
         {
@@ -179,7 +180,7 @@ public class OctTreeFast : MonoBehaviour
             data.UpdateNeighborsOnSplit(node_);
             for (int i = 0; i < 8; i++)
             {
-                var (new_valid_neighbors, new_invalid_neighbors) = data.ComputeNeighbors(node_, i);         
+                var (new_valid_neighbors, new_invalid_neighbors) = data.ComputeNeighbors(node_, i);
                 BuildOctree(new_centers[i], new_scale, node_, node_.idx+i.ToString(), new_valid_neighbors, new_invalid_neighbors);
             }
         }
@@ -556,12 +557,19 @@ public class OctTreeFast : MonoBehaviour
         {
             Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             t0 = Time.realtimeSinceStartupAsDouble;
-            // update the graph: recompute it all or find a local update method
+            // update the graph with a local update method
             UpdateGraph();
             AstarFast path_finder = GetComponent<AstarFast>();
             if (!path_finder.read_from_file)
             {
-                path_finder.RecomputePath();
+                try
+                {
+                    path_finder.RecomputePath();
+                }
+                catch
+                {
+                    Debug.Log("start or target inside of obstacle");
+                }
             }
             Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
 

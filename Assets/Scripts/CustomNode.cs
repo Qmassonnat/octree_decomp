@@ -126,7 +126,7 @@ public class CustomNode : MonoBehaviour
                 else
                 {
 
-                    int last = int.Parse(other_idx[other_idx.Length - 1].ToString());
+                    int last = int.Parse(other_idx[idx.Length].ToString());
 
                     cn.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { idx + (last + Direction2Int(entry.Key)).ToString() });
                 }
@@ -150,15 +150,15 @@ public class CustomNode : MonoBehaviour
                 // if the node is larger or has not been split yet
                 if (other_idx.Length <= idx.Length)
                 {
-                    cn.AddInvalidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(idx, entry.Key));
+                    cn.AddValidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(idx, entry.Key));
                 }
                 // if the node has already been split
                 else
                 {
 
-                    int last = int.Parse(other_idx[other_idx.Length - 1].ToString());
+                    int last = int.Parse(other_idx[idx.Length].ToString());
 
-                    cn.AddInvalidNeighbors(GetOppositeDirection(entry.Key), new List<string> { idx + (last + Direction2Int(entry.Key)).ToString() });
+                    cn.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { idx + (last + Direction2Int(entry.Key)).ToString() });
                 }
             }
         }
@@ -243,25 +243,26 @@ public class CustomNode : MonoBehaviour
             int i = int.Parse(t.name[t.name.Length - 1].ToString());
             foreach (var direction in directions)
             {
-                // only add the non-children neighbors
-                if (!TestDirection(direction, i)) {
-                    foreach (var neighbor in cn.valid_neighbors[direction])
-                    {
-                        // make sure the neighbor has not already been added
-                        if (!cn_parent.valid_neighbors[direction].Contains(neighbor))
-                            cn_parent.valid_neighbors[direction].Add(neighbor);
-                        // remove the child from the adjacent node's neighbor list
-                        CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
-                        cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
-                    }
-                    foreach (var neighbor in cn.invalid_neighbors[direction])
-                    {
-                        if (!cn_parent.invalid_neighbors[direction].Contains(neighbor))
-                            cn_parent.invalid_neighbors[direction].Add(neighbor);
-                        // remove the child from the adjacent node's neighbor list
-                        CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
-                        cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
-                    }
+                // only add the non-children neighbors 
+                // TODO check the n-1 first characters of the name are equal rather than direction for pruned octtree
+                foreach (var neighbor in cn.valid_neighbors[direction])
+                {
+                    // make sure the neighbor has not already been added and is not a brother
+                    if (neighbor.Substring(0, neighbor.Length - 1) != cn.idx.Substring(0, cn.idx.Length - 1) &&
+                    !cn_parent.valid_neighbors[direction].Contains(neighbor))
+                        cn_parent.valid_neighbors[direction].Add(neighbor);
+                    // remove the child from the adjacent node's neighbor list
+                    CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                    cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
+                }
+                foreach (var neighbor in cn.invalid_neighbors[direction])
+                {
+                    if (neighbor.Substring(0, neighbor.Length - 1) != cn.idx.Substring(0, cn.idx.Length - 1) &&  
+                    !cn_parent.invalid_neighbors[direction].Contains(neighbor))
+                        cn_parent.invalid_neighbors[direction].Add(neighbor);
+                    // remove the child from the adjacent node's neighbor list
+                    CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
+                    cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(cn.idx);
                 }
             }
         }

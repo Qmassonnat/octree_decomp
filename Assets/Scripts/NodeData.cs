@@ -114,7 +114,7 @@ public class NodeData : ScriptableObject
                 // if the node has already been split
                 else
                 {
-                    int last = int.Parse(neigh.idx[neigh.idx.Length - 1].ToString()); ;
+                    int last = int.Parse(neigh.idx[cn.idx.Length].ToString()); ;
                     neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { cn.idx + (last + Direction2Int(entry.Key)).ToString() });
                 }
             }
@@ -134,15 +134,13 @@ public class NodeData : ScriptableObject
                 // if the node is larger or has not been split yet
                 if (neigh.idx.Length <= cn.idx.Length)
                 {
-                    neigh.AddInvalidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(cn.idx, entry.Key));
+                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(cn.idx, entry.Key));
                 }
                 // if the node has already been split
                 else
                 {
-
-                    int last = int.Parse(neigh.idx[neigh.idx.Length - 1].ToString());
-
-                    neigh.AddInvalidNeighbors(GetOppositeDirection(entry.Key), new List<string> { cn.idx + (last + Direction2Int(entry.Key)).ToString() });
+                    int last = int.Parse(neigh.idx[cn.idx.Length].ToString());
+                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { cn.idx + (last + Direction2Int(entry.Key)).ToString() });
                 }
             }
         }
@@ -201,8 +199,8 @@ public class NodeData : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the node from valid neighbors and add it to invalid neighbors
-                neigh.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
-                neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(cn.idx);
+                    neigh.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
+                    neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(cn.idx);
             }
         }
     }
@@ -252,7 +250,8 @@ public class NodeData : ScriptableObject
             {
                 // add the parent to the adjacent node's neighbor list
                 CustomNodeScriptable neigh = FindNode(neigh_idx);
-                neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
+                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
             }
         }
         foreach (string direction in directions)
@@ -261,7 +260,8 @@ public class NodeData : ScriptableObject
             {
                 // add the parent to the adjacent node's neighbor list
                 CustomNodeScriptable neigh = FindNode(neigh_idx);
-                neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
+                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
             }
         }
     }
@@ -394,9 +394,9 @@ public class NodeData : ScriptableObject
         {
             if (cn.name != "invalid")
             {
-                //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //g.transform.position = cn.position;
-                //g.transform.localScale = cn.scale;
+                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                g.transform.position = cn.position;
+                g.transform.localScale = cn.scale;
                 invalidNodes[cn.idx] = cn;
                 cn.LoadNeighbors();
             }

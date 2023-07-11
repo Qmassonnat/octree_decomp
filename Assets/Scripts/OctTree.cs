@@ -127,8 +127,9 @@ public class OctTree : MonoBehaviour
     }
 
 
-    public void SplitNode(GameObject node_)
+    public GameObject SplitNode(GameObject node_)
     {
+        //Debug.Log("split" + node_.name);
         Vector3 scale = node_.transform.lossyScale;
         // if this was a valid leaf turn it into a node
         if (node_.CompareTag("Valid"))
@@ -136,7 +137,7 @@ public class OctTree : MonoBehaviour
             node_ = ChangeType(node_, "Valid", "Node");
         }
         CustomNode cn = node_.GetComponent<CustomNode>();
-        if (scale.x > minSize)
+        if (scale.x > minSize && scale.y > minSize && scale.z > minSize)
         {
             Vector3[] new_centers = new Vector3[8];
             Vector3 center = node_.transform.position;
@@ -163,6 +164,7 @@ public class OctTree : MonoBehaviour
             cn.UpdateNeighborsOnInvalid();
             node_ = ChangeType(node_, "Node", "Invalid");
         }
+        return node_;
     }
 
     Vector3 Center2corner(Vector3 center, Vector3 scale)
@@ -332,8 +334,6 @@ public class OctTree : MonoBehaviour
 
     public void BuildGraph()
     {
-        if (GameObject.Find("transitions") != null)
-            DestroyImmediate(GameObject.Find("transitions"));
         GameObject empty = new GameObject();
         empty.name = "transitions";
         empty.transform.parent = gameObject.transform;
@@ -367,7 +367,6 @@ public class OctTree : MonoBehaviour
                                 (Mathf.Max(cn_pos.y - cn.transform.lossyScale.y / 2, neigh_pos.y - neigh_.transform.lossyScale.y / 2) + Mathf.Min(cn_pos.y + cn.transform.lossyScale.y / 2, neigh_pos.y + neigh_.transform.lossyScale.y / 2)) / 2,
                                 (Mathf.Max(cn_pos.z - cn.transform.lossyScale.z / 2, neigh_pos.z - neigh_.transform.lossyScale.z / 2) + Mathf.Min(cn_pos.z + cn.transform.lossyScale.z / 2, neigh_pos.z + neigh_.transform.lossyScale.z / 2)) / 2);
                         new_transitions[(cn.name, neigh_.name)] = transition;
-                        
                     }
                 }
             }
@@ -435,8 +434,18 @@ public class OctTree : MonoBehaviour
         while (to_split.Count > 0)
         {
             var node = to_split[0];
+            if (node == null)
+                continue;
             to_split.Remove(to_split.First());
-            SplitNode(node);
+            node = SplitNode(node);
+            foreach (Transform tr in node.transform)
+            {
+                GameObject child = tr.gameObject;
+                if (child.CompareTag("Valid"))
+                {
+                    //PruneOctTree(new List<CustomNode> { child.GetComponent<CustomNode>() }, null);
+                }
+            }
         }
         // if invalid -> valid, try to restore the parent node
         foreach (GameObject gi in GameObject.FindGameObjectsWithTag("Invalid"))
@@ -451,12 +460,21 @@ public class OctTree : MonoBehaviour
         // if the octtree has been updated, update the graph and recompute the path
         if (changed)
         {
-            // update the graph: recompute it all or find a local update method
+            // update the graph: recompute it all
             BuildGraph();
             Astar path_finder = GetComponent<Astar>();
             if (!path_finder.read_from_file)
             {
-                path_finder.RecomputePath();
+                try
+                {
+                    path_finder.RecomputePath();
+                }
+                catch
+                {
+                    Debug.Log("start or target inside of obstacle");
+                    DestroyImmediate(GameObject.Find("New Game Object"));
+                    DestroyImmediate(GameObject.Find("New Game Object"));
+                }
             }
             Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
 
@@ -465,6 +483,7 @@ public class OctTree : MonoBehaviour
 
     public void RepairNode(GameObject node)
     {
+        //Debug.Log("repair" + node.name);
         // transform the invalid node into a valid node, updating its neighbors
         node = ChangeType(node, "Invalid", "Valid");
         CustomNode cn = node.GetComponent<CustomNode>();
@@ -474,9 +493,9 @@ public class OctTree : MonoBehaviour
         // if the parent was already repaired, quit
         if (parent.CompareTag("Valid"))
             return;
-        elongated_criteria = 99;
-        PruneOctTree(new List<CustomNode> { cn }, new List<CustomNode>());
-        /*bool merge = true;
+        //elongated_criteria = 99;
+        //PruneOctTree(new List<CustomNode> { cn }, new List<CustomNode>());
+        bool merge = true;
         while (merge)
         {
             Transform tr = parent.transform;
@@ -488,7 +507,9 @@ public class OctTree : MonoBehaviour
             }
             if (merge)
             {
+                //Debug.Log("merge" + parent.name);
                 cn.UpdateNeighborsOnMerge(parent);
+                UpdateParentTransform(parent);
                 while (parent.transform.childCount > 0) {
                     validNodes.Remove(parent.transform.GetChild(0).gameObject.GetComponent<CustomNode>());
                     DestroyImmediate(parent.transform.GetChild(0).gameObject); 
@@ -501,10 +522,24 @@ public class OctTree : MonoBehaviour
             else
                 // we reached the root node
                 merge = false;
-        }
-        */
+        }        
+    }
 
-        // make sure neighbors are updated correctly in all scenarios, including when merging children
+    public void UpdateParentTransform(GameObject parent)
+    {
+        Vector3 min = Vector3.positiveInfinity;
+        Vector3 max = Vector3.negativeInfinity;
+        foreach (Transform t in parent.transform)
+        {
+            GameObject child = t.gameObject;
+            min = Vector3.Min(min, child.transform.position - child.transform.lossyScale/2);
+            max = Vector3.Max(max, child.transform.position + child.transform.lossyScale/2);
+        }
+        parent.transform.position = (min + max) / 2;
+        parent.transform.localScale = max - min;
+        CustomNode cn = parent.GetComponent<CustomNode>();
+        cn.position = (min + max) / 2;
+        cn.scale = max - min;
     }
 
     public GameObject ChangeType(GameObject g, string old_type, string new_type)

@@ -54,7 +54,7 @@ public class AstarFast : MonoBehaviour
             // execute A* on all the random positions
             if (read_from_file)
                 TestRandomPositions(folder);
-            else
+            else if (GameObject.Find("MapGenerator") == null)
                 A_star_path(start, target);
             string path = SceneManager.GetActiveScene().name + gameObject.GetComponent<OctTreeFast>().minSize;
             if (!GetComponent<OctTreeFast>().load || !AssetDatabase.IsValidFolder("Assets/Data/"+path))

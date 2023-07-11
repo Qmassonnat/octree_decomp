@@ -46,7 +46,7 @@ public class WarframeMap : MonoBehaviour
         string test_path = Application.dataPath + "/Warframe/" + map_name + "_paths.txt";
         StreamReader sr = new StreamReader(test_path);
         string s = sr.ReadLine();
-        int cont = 3;
+        int cont = 10;
         AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
         float min = 1000;
         float max = 0;
