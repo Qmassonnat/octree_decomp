@@ -11,7 +11,6 @@ public class DynamicObstacles : MonoBehaviour
     private List<Vector3> obs_vel  = new List<Vector3>();
     private float bound;
     private float zBound;
-    private float t0;
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +38,6 @@ public class DynamicObstacles : MonoBehaviour
             Debug.LogError("Pathfinding component inactive");
         }
         AddAsteroids(obs_number);
-        t0 = Time.realtimeSinceStartup;
     }
 
     public void AddAsteroids(int n)
@@ -53,7 +51,6 @@ public class DynamicObstacles : MonoBehaviour
             obs.transform.position = pos;
             obs_list.Add(obs);
             obs_vel.Add(vel);
-            Debug.Log(pos + " " + vel);
         }
     }
 
@@ -61,13 +58,13 @@ public class DynamicObstacles : MonoBehaviour
     {
         for (int i = 0; i<obs_list.Count; i++)
         {
+            
             //Vector3 new_pos = new Vector3(UnityEngine.Random.Range(-bound, bound), UnityEngine.Random.Range(0, zBound), UnityEngine.Random.Range(-bound, bound));
             Vector3 new_pos = obs_list[i].transform.position + 5*(obs_vel[i] * Time.deltaTime);
             // make the obstacles warp around the level at (bound+obs_size/2)
             new_pos.x = (new_pos.x + 3*(bound + obs_size/2)) % (2*bound + obs_size) - (bound + obs_size/2);
             new_pos.y = (new_pos.y + +zBound + obs_size + obs_size / 2) % (zBound + obs_size) - obs_size/2;
             new_pos.z = (new_pos.z + 3*(bound + obs_size/2)) % (2*bound + obs_size) - (bound + obs_size/2);
-            //Debug.Log("moving from " + obs_list[i].transform.position + " to " + new_pos);
             obs_list[i].transform.position = new_pos;
         }
     }
@@ -75,10 +72,6 @@ public class DynamicObstacles : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (true || Time.realtimeSinceStartup  - t0> 0.5)
-        {
-            t0 = Time.realtimeSinceStartup;
-            MoveObstacles();
-        }
+        MoveObstacles();
     }
 }

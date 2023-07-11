@@ -56,7 +56,7 @@ public class CustomNode : MonoBehaviour
                 List<string> to_remove = new List<string>();
                 foreach (string neighbor in new_valid_neighbors[GetOppositeDirection(direction)])
                 {
-                    if (neighbor.Length == idx.Length + 1 && !neighbor.EndsWith((i + Direction2Int(direction)).ToString()))
+                    if (neighbor.Length > idx.Length && !(neighbor[idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
                         to_remove.Add(neighbor);
                 }
                 foreach (string neighbor in to_remove) {
@@ -89,7 +89,7 @@ public class CustomNode : MonoBehaviour
                 List<string> to_remove = new List<string>();
                 foreach (string neighbor in new_invalid_neighbors[GetOppositeDirection(direction)])
                 {
-                    if (neighbor.Length == idx.Length + 1 && !neighbor.EndsWith((i + Direction2Int(direction)).ToString()))
+                    if (neighbor.Length > idx.Length && !(neighbor[idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
                         to_remove.Add(neighbor);
                 }
                 foreach (string neighbor in to_remove)
@@ -273,7 +273,8 @@ public class CustomNode : MonoBehaviour
             {
                 // add the parent to the adjacent node's neighbor list
                 CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
-                cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
+                if (!cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(cn_parent.idx))
+                    cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
             }
         }
         foreach (string direction in directions)
@@ -282,7 +283,8 @@ public class CustomNode : MonoBehaviour
             {
                 // add the parent to the adjacent node's neighbor list
                 CustomNode cn_neigh = GameObject.Find("_" + neighbor).GetComponent<CustomNode>();
-                cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
+                if (!cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(cn_parent.idx))
+                    cn_neigh.valid_neighbors[GetOppositeDirection(direction)].Add(cn_parent.idx);
             }
         }
     }

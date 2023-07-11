@@ -22,8 +22,6 @@ public class NodeData : ScriptableObject
             return validNodes[idx];
         else if (invalidNodes.ContainsKey(idx))
             return invalidNodes[idx];
-        else
-            //Debug.Log("node not found: " + idx);
         return null;
     }
 
@@ -47,7 +45,7 @@ public class NodeData : ScriptableObject
                 List<string> to_remove = new List<string>();
                 foreach (string neighbor in new_valid_neighbors[GetOppositeDirection(direction)])
                 {
-                    if (neighbor.Length == cn.idx.Length + 1 && !neighbor.EndsWith((i + Direction2Int(direction)).ToString()))
+                    if (neighbor.Length > cn.idx.Length && ! (neighbor[cn.idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
                         to_remove.Add(neighbor);
                 }
                 foreach (string neighbor in to_remove)
@@ -81,7 +79,7 @@ public class NodeData : ScriptableObject
                 List<string> to_remove = new List<string>();
                 foreach (string neighbor in new_invalid_neighbors[GetOppositeDirection(direction)])
                 {
-                    if (neighbor.Length == cn.idx.Length + 1 && !neighbor.EndsWith((i + Direction2Int(direction)).ToString()))
+                    if (neighbor.Length > cn.idx.Length && !(neighbor[cn.idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
                         to_remove.Add(neighbor);
                 }
                 foreach (string neighbor in to_remove)
@@ -224,7 +222,7 @@ public class NodeData : ScriptableObject
                 if (!TestDirection(direction, i))
                 {
                     foreach (var neigh_idx in child.valid_neighbors[direction])
-                    {
+                    {                                           
                         // make sure the neighbor has not already been added
                         if (!parent.valid_neighbors[direction].Contains(neigh_idx))
                             parent.valid_neighbors[direction].Add(neigh_idx);
