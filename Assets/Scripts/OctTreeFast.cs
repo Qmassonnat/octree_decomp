@@ -36,7 +36,7 @@ public class OctTreeFast : MonoBehaviour
             Debug.Log("Loading data from file " + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             task = "finished";
             gameObject.tag = "Finished";
-            Debug.Log(data.nodes.Count + " " + data.validNodes.Count);
+            Debug.Log(data.nodes.Count + " nodes " + data.validNodes.Count + " valid cells");
         }
         else
         {
@@ -545,13 +545,24 @@ public class OctTreeFast : MonoBehaviour
                 to_split.Remove(ci);
             }
         }
-        // if the octtree has been updated, update the graph and recompute the path
-        bool path_blocked = data.path_cells.Count == 0;
-        foreach (var idx in data.path_cells)
+        // if there is an obstacle along the path, update the graph and recompute the path
+        bool path_blocked = false;
+        if (GetComponent<AstarFast>().move)
         {
-            CustomNodeScriptable cn = data.FindNode(idx);
-            if (to_split.Contains(cn))
-                path_blocked = true;
+            foreach (var idx in GetComponent<AstarFast>().CellsAhead())
+            {
+                CustomNodeScriptable cn = data.FindNode(idx);
+                if (to_split.Contains(cn))
+                    path_blocked = true;
+            }
+        }
+        else {
+            foreach (var idx in data.path_cells)
+            {
+                CustomNodeScriptable cn = data.FindNode(idx);
+                if (to_split.Contains(cn))
+                    path_blocked = true;
+            }
         }
         // if we want to update as soon as we can just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
         //path_blocked = to_repair.Count > 0 || to_split.Count > 0;

@@ -14,6 +14,8 @@ public class AstarFast : MonoBehaviour
     public bool draw;
     public bool prune;
     public bool funnel;
+    public bool move;
+    public float collDetectRange = 5;
     [HideInInspector] public NodeData data;
     private Dictionary<string, List<(string, float)>> temp_edges;
     private CustomNodeScriptable startNode;
@@ -22,6 +24,7 @@ public class AstarFast : MonoBehaviour
     private string target_idx;
     private bool done;
     private int nb_visited;
+    private float distAlongPath = 0;
     private List<(Vector3, string, float)> path_idx = new List<(Vector3, string, float)>();
     private GameObject drawPath;
 
@@ -66,6 +69,21 @@ public class AstarFast : MonoBehaviour
                 Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             }
         }   
+        else if (done)
+        {
+            if (move && distAlongPath < path_idx.Last().Item3 + 1)
+            {
+                if (distAlongPath == 0)
+                {
+                    GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    g.transform.position = start;
+                    g.transform.localScale = 0.5f * Vector3.one;
+                    g.name = "Player";
+                }
+                MoveAlongPath();
+                distAlongPath += 2*Time.deltaTime;
+            }
+        }
     }
 
     void InsertTempNode(CustomNodeScriptable temp_node)
@@ -490,7 +508,44 @@ public class AstarFast : MonoBehaviour
             while (drawPath.transform.childCount > 0)
                 DestroyImmediate(drawPath.transform.GetChild(0).gameObject);
         }
+        if (move)
+        {
+            start = GameObject.Find("Player").transform.position;
+            distAlongPath = 0;
+        }
         var (nb_visited, path_length, dt) = A_star_path(start, target);
+    }
+
+    public void MoveAlongPath()
+    {
+        GameObject g = GameObject.Find("Player");
+        Vector3 previous = start;
+        var (next, _, d) = path_idx[0];
+        float old_d = 0;
+        int cur = 1;
+        while (next != target && distAlongPath > d)
+        {
+            old_d = d;
+            previous = next;
+            (next, _, d) = path_idx[cur];
+            cur++;
+        }
+        g.transform.position = next + Math.Max(0, (d - distAlongPath)/(d-old_d)) * (previous - next);
+    }
+
+    public List<string> CellsAhead()
+    {
+        // returns the list of cells crossed between distAlongPath and distAlongPath + collDetectRange
+        List<string> cellsAhead = new List<string>();
+        float old_d = 0;
+        foreach (var (_, idx, d) in path_idx) {
+            if (distAlongPath < d && distAlongPath+collDetectRange > old_d)
+            {
+                cellsAhead.Add(idx);
+                old_d = d;
+            }
+        }
+        return cellsAhead;
     }
 
 }
