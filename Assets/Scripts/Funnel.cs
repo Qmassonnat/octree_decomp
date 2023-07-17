@@ -50,10 +50,6 @@ public class Funnel : MonoBehaviour
             normalized_fov[j] = (fov[j] - anchorPoint) / Vector3.Distance(fov[j], anchorPoint);
     }
 
-    IEnumerator WaitF()
-    {
-        yield return new WaitForSeconds(10f);
-    }
 
     // computes the intersection between fov and transition, returning false if the intersection is empty
     public bool ConvexIntersection(List<Vector3> transition)

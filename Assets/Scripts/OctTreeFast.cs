@@ -14,7 +14,8 @@ public class OctTreeFast : MonoBehaviour
     public float elongated_criteria; // 0 for no merging, high values for aggressive merging
     public bool load;
     [HideInInspector] public NodeData data;
-    private List<CustomNodeScriptable> to_split;
+    private List<CustomNodeScriptable> to_split = new List<CustomNodeScriptable>();
+    private List<CustomNodeScriptable> to_repair = new List<CustomNodeScriptable>();
     private List<(string, string)> transitions_add = new List<(string, string)>();
     private List<(string, string)> transitions_remove = new List<(string, string)>();
     private string task;
@@ -524,37 +525,49 @@ public class OctTreeFast : MonoBehaviour
         // iterate over all nodes
         // if valid -> invalid, split + update neighbors
         CollisionCheck coll = GetComponent<CollisionCheck>();
-        bool changed = false;
-        to_split = new List<CustomNodeScriptable>();
         foreach (CustomNodeScriptable cv in data.validNodes.Values)
         {
-            if (!coll.IsEmpty(cv.position, cv.scale))
+            // check that this node is not empty anymore and has not been staged to be split already
+            if (!to_split.Contains(cv) && !coll.IsEmpty(cv.position, cv.scale))
             {
-                changed = true;
                 to_split.Add(cv);
+                to_repair.Remove(cv);
             }
         }
-        while (to_split.Count > 0)
-        {
-            var node = to_split[0];
-            to_split.Remove(to_split.First());
-            SplitNode(node);
-        }
+        
         // if invalid -> valid, try to restore the parent node
-        List<CustomNodeScriptable> to_repair = new List<CustomNodeScriptable>();
         foreach (CustomNodeScriptable ci in data.invalidNodes.Values)
         {
-            if (coll.IsEmpty(ci.position, ci.scale))
+            // check that this node is now empty and has not been staged to be repaired already
+            if (!to_repair.Contains(ci) && coll.IsEmpty(ci.position, ci.scale))
             {
-                changed = true;
                 to_repair.Add(ci);
+                to_split.Remove(ci);
             }
         }
-        foreach (CustomNodeScriptable ci in to_repair)
-            RepairNode(ci);
         // if the octtree has been updated, update the graph and recompute the path
-        if (changed)
+        bool path_blocked = data.path_cells.Count == 0;
+        foreach (var idx in data.path_cells)
         {
+            CustomNodeScriptable cn = data.FindNode(idx);
+            if (to_split.Contains(cn))
+                path_blocked = true;
+        }
+        // if we want to update as soon as we can just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
+        //path_blocked = to_repair.Count > 0 || to_split.Count > 0;
+        if (path_blocked)
+        {
+            while (to_split.Count > 0)
+            {
+                var node = to_split[0];
+                to_split.Remove(to_split.First());
+                SplitNode(node);
+            }
+            foreach (CustomNodeScriptable ci in to_repair)
+                RepairNode(ci);
+            to_split = new List<CustomNodeScriptable>();
+            to_repair = new List<CustomNodeScriptable>();
+
             Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph with a local update method
@@ -572,8 +585,9 @@ public class OctTreeFast : MonoBehaviour
                 }
             }
             Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-
         }
+
+        
     }
 
     public void RepairNode(CustomNodeScriptable node)

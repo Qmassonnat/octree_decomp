@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 using System.IO;
 
 public class NodeData : ScriptableObject
@@ -11,6 +12,7 @@ public class NodeData : ScriptableObject
     public Dictionary<string, CustomNodeScriptable> invalidNodes = new Dictionary<string, CustomNodeScriptable>();
     public Dictionary<string, CustomNodeScriptable> nodes = new Dictionary<string, CustomNodeScriptable>();
     public Dictionary<string, string> deletedNodes = new Dictionary<string, string>();
+    public List<string> path_cells = new List<string>();
     public DeletedNodes deleted;
     private string[] directions = new string[] { "up", "down", "left", "right", "forward", "backward" };
 

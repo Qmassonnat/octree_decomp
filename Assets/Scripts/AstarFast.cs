@@ -22,6 +22,7 @@ public class AstarFast : MonoBehaviour
     private string target_idx;
     private bool done;
     private int nb_visited;
+    private List<(Vector3, string, float)> path_idx = new List<(Vector3, string, float)>();
     private GameObject drawPath;
 
     // Start is called before the first frame update
@@ -76,7 +77,7 @@ public class AstarFast : MonoBehaviour
         Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound/2, octTreeGenerator.bound);
         string idx = "0";
         string merged_idx = "";
-        int n = 20;
+        int n = 2 + (int)Mathf.Log((float)octTreeGenerator.zBound/(float)octTreeGenerator.minSize, 2f);
         while (n>0 && !data.validNodes.ContainsKey(merged_idx))
         {
             n--;
@@ -169,7 +170,16 @@ public class AstarFast : MonoBehaviour
 
             // path refining
             foreach (CustomNodeScriptable n in shortestPath)
+            {
                 path_positions.Add(n.position);
+                if (n.idx == "start" || n.idx == "target")
+                    continue;
+                string[] t = n.idx.Split("&");
+                if (!data.path_cells.Contains(t[0]))
+                    data.path_cells.Add(t[0]);
+                if (!data.path_cells.Contains(t[1]))
+                    data.path_cells.Add(t[1]);
+            }
             if (draw)
                 DrawPath(path_positions, Color.red);
             if (funnel)
@@ -184,12 +194,34 @@ public class AstarFast : MonoBehaviour
             {
                 DrawPath(path_positions, Color.green);
             }
-
+            // keep track of the nodes we cross and their distance along the path for the movement model and recomputing the path
+            // TODO make it work with funnel -> when adding a new anchor point, also add the positions of the intersections between the transitions and the line connecting the 2 anchors? (and pruning?)
+            float dist_along_path = Vector3.Distance(shortestPath[1].position, start);
+            path_idx = new List<(Vector3, string, float)> { (shortestPath[1].position, start_idx, dist_along_path) };
+            for (int i = 1; i<shortestPath.Count - 1; i++)
+            {
+                CustomNodeScriptable node = shortestPath[i];
+                dist_along_path += Vector3.Distance(node.position, shortestPath[i+1].position);
+                // a transition idx in the middle of the path is written idx1&idx2, and one of these idx is the previous entry in path_idx
+                string idx = path_idx.Last().Item2;
+                string[] li = node.idx.Split("&");
+                if (idx == li[0])
+                    path_idx.Add((shortestPath[i + 1].position, li[1], dist_along_path));
+                else
+                    path_idx.Add((shortestPath[i + 1].position, li[0], dist_along_path));
+            }
+            /*foreach (var tuple in path_idx)
+            {
+                Vector3 pos = tuple.Item1;
+                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                g.transform.position = pos;
+            } */
             path_length = PathLength(path_positions);
         }
         else
         {
             shortestPath = new List<CustomNodeScriptable> { startNode, targetNode };
+            data.path_cells.Add(start_idx);
             path_length = Vector3.Distance(startNode.position, targetNode.position);
         }
         
