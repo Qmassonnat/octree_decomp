@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class WarframeMap : MonoBehaviour
 {
@@ -44,37 +45,48 @@ public class WarframeMap : MonoBehaviour
     public void TestScenario()
     {
         string test_path = Application.dataPath + "/Warframe/" + map_name + "_paths.txt";
+        AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
+        if (!Directory.Exists(Application.dataPath + "/Results/Warframe"))
+            Directory.CreateDirectory(Application.dataPath + "/Results/Warframe");
+        string filename = Application.dataPath + "/Results/Warframe/" + map_name + ".txt";
+        StreamWriter sw = new StreamWriter(filename);
+        List<double> nodes_searched = new List<double>();
+        List<double> length = new List<double>();
+        List<double> time = new List<double>();
         StreamReader sr = new StreamReader(test_path);
         string s = sr.ReadLine();
-        int cont = 10;
-        AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
-        float min = 1000;
-        float max = 0;
-        while (s != null && cont>0)
+        while (s != null)
         {
             string[] li = s.Split(" ");
             Vector3 start = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
             Vector3 target = new Vector3(float.Parse(li[3]), float.Parse(li[4]), float.Parse(li[5])) - offset;
-            //GameObject.Find("Start").transform.position = start;
-            //GameObject.Find("Target").transform.position = target;
-            try
-            {
-                var (nb, l, dt) = pf.A_star_path(start, target); 
-                float opt_length = float.Parse(li[6]);
-                float opt_ratio = float.Parse(li[7]);
-                min = Mathf.Min(min, opt_length);
-                max = Mathf.Max(max, opt_length);
-                Debug.Log("OPT"+opt_length + " " + opt_ratio);
-                Debug.Log("Octtree"+nb + " " + l + " " + dt);
-            }
-            catch
-            {
-                Debug.Log(start + " " + target);
-            }
-            cont--;
+            var (searched, l, dt) = pf.A_star_path(start, target);
+            nodes_searched.Add(searched);
+            length.Add(l);
+            time.Add(dt);
             s = sr.ReadLine();
         }
-        Debug.Log(min + " " + max);
+        // remove the first entry as Unity is slow at startup
+        nodes_searched.Remove(nodes_searched[0]);
+        time.Remove(time[0]);
+        length.Remove(length[0]);
+
+        int n = nodes_searched.Count;
+        nodes_searched.Sort();
+        time.Sort();
+        length.Sort();
+        var (avg_nodes, std_nodes) = pf.STD(nodes_searched);
+        var (avg_length, std_length) = pf.STD(length);
+        var (avg_time, std_time) = pf.STD(time);
+        sw.WriteLine(filename + "success rate" + (float)n / 1000);
+        sw.WriteLine("avg," + avg_length.ToString() + "," + avg_nodes.ToString() + "," + decimal.Round(((decimal)(avg_time)) * 1000m, 3).ToString());
+        sw.WriteLine("std," + std_length.ToString() + "," + std_nodes.ToString() + "," + decimal.Round(((decimal)(std_time)) * 1000m, 3).ToString());
+        sw.WriteLine("min," + length[0].ToString() + "," + nodes_searched[0].ToString() + "," + decimal.Round(((decimal)(time[0])) * 1000m, 3).ToString());
+        sw.WriteLine("Q1," + length[(int)n / 4].ToString() + "," + nodes_searched[(int)n / 4].ToString() + "," + decimal.Round(((decimal)(time[(int)n / 4])) * 1000m, 3).ToString());
+        sw.WriteLine("median," + length[(int)n / 2].ToString() + "," + nodes_searched[(int)n / 2].ToString() + "," + decimal.Round(((decimal)(time[(int)n / 2])) * 1000m, 3).ToString());
+        sw.WriteLine("Q3," + length[(int)3 * n / 4].ToString() + "," + nodes_searched[(int)3 * n / 4].ToString() + "," + decimal.Round(((decimal)(time[(int)3 * n / 4])) * 1000m, 3).ToString());
+        sw.WriteLine("max," + length[n - 1].ToString() + "," + nodes_searched[n - 1].ToString() + "," + decimal.Round(((decimal)(time[n - 1])) * 1000m, 3).ToString());
+        sw.Close();
 
     }
 
