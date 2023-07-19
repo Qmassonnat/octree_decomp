@@ -234,7 +234,8 @@ public class AstarFast : MonoBehaviour
                 DrawPath(path_positions, Color.green);
             }
             // keep track of the nodes we cross and their distance along the path for the movement model and recomputing the path
-            ComputePathIdx2(path_positions);
+            if (move) 
+                ComputePathIdx2(path_positions);
             path_length = PathLength(path_positions);
         }
         else

@@ -66,10 +66,12 @@ public class WarframeMap : MonoBehaviour
             time.Add(dt);
             s = sr.ReadLine();
         }
-        // remove the first entry as Unity is slow at startup
-        nodes_searched.Remove(nodes_searched[0]);
-        time.Remove(time[0]);
-        length.Remove(length[0]);
+        // remove the first 5 entries as Unity is slow at startup
+        for (int j=0; j<5; j++) { 
+            nodes_searched.Remove(nodes_searched[0]);
+            time.Remove(time[0]);
+            length.Remove(length[0]);
+        }
 
         int n = nodes_searched.Count;
         nodes_searched.Sort();

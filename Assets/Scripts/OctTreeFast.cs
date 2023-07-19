@@ -579,8 +579,9 @@ public class OctTreeFast : MonoBehaviour
                     path_blocked = true;
             }
         }
-        // if we want to update as soon as we can just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        //path_blocked = to_repair.Count > 0 || to_split.Count > 0;
+        // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
+        if (!GetComponent<AstarFast>().move)
+            path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {
             while (to_split.Count > 0)
