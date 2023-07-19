@@ -86,40 +86,61 @@ public class AstarFast : MonoBehaviour
         }
     }
 
+    public (string,string) Pos2Idx(Vector3 v)
+    {
+        OctTreeFast octTreeGenerator = gameObject.GetComponent<OctTreeFast>();
+        Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound / 2, octTreeGenerator.bound);
+        List<(string, string, Vector3)> candidate_idx = new List<(string, string, Vector3)> { ("0", "", new Vector3(0, octTreeGenerator.zBound / 2, 0)) };
+        int n = 2 + (int)Mathf.Log((float)octTreeGenerator.zBound / (float)octTreeGenerator.minSize, 2f);
+        while (n > 0)
+        {
+            n--;
+            scale /= 2;
+            List<(string, string, Vector3)> new_candidate_idx = new List<(string, string, Vector3)>();
+            foreach (var (idx, merged_idx, position) in candidate_idx) {
+                if (data.validNodes.ContainsKey(merged_idx))
+                    return (idx, merged_idx);
+                // Find in which children the argument position can be
+                // if v is on the edge/corner between several nodes, add all of them to find a valid one
+                bool[] candidate_x = { v.x <= position.x, v.x >= position.x };
+                bool[] candidate_y = { v.y <= position.y, v.y >= position.y };
+                bool[] candidate_z = { v.z <= position.z, v.z >= position.z };
+                for (int i=0; i<8; i++)
+                {
+                    if (candidate_x[i % 2] && candidate_y[i/4] && candidate_z[(i%4)/2])
+                    {
+                        // add i and the good position
+                        string new_idx = idx + i.ToString();
+                        // update the position of the candidate node
+                        Vector3 new_position = position;
+                        if (v.x > position.x)
+                            new_position.x += scale.x;
+                        else
+                            new_position.x -= scale.x;
+                        if (v.y > position.y)
+                            new_position.y += scale.y;
+                        else
+                            new_position.y -= scale.y;
+                        if (v.z > position.z)
+                            new_position.z += scale.z;
+                        else
+                            new_position.z -= scale.z;
+                        new_candidate_idx.Add((new_idx, octTreeGenerator.FindMergedNode(new_idx), new_position));
+                    }
+                }                
+                candidate_idx = new_candidate_idx;
+            }
+        }
+        if (n == 0)
+            Debug.LogError("Error in InsertTempNode");
+        return (null, null);
+    }
+
     void InsertTempNode(CustomNodeScriptable temp_node)
     {
         data.nodes[temp_node.idx] = temp_node;
         temp_node.edges = new List<(string, float)>();
-        OctTreeFast octTreeGenerator = gameObject.GetComponent<OctTreeFast>();
-        Vector3 position = new Vector3(0, octTreeGenerator.zBound / 2, 0);
-        Vector3 scale = new Vector3(octTreeGenerator.bound, octTreeGenerator.zBound/2, octTreeGenerator.bound);
-        string idx = "0";
-        string merged_idx = "";
-        int n = 2 + (int)Mathf.Log((float)octTreeGenerator.zBound/(float)octTreeGenerator.minSize, 2f);
-        while (n>0 && !data.validNodes.ContainsKey(merged_idx))
-        {
-            n--;
-            int i = 1 * (temp_node.position.x > position.x ? 1 : 0) + 2 * (temp_node.position.z > position.z ? 1 : 0) + 4 * (temp_node.position.y > position.y ? 1 : 0);
-            // Find in which children the argument position is
-            idx = idx + i.ToString();
-            merged_idx = gameObject.GetComponent<OctTreeFast>().FindMergedNode(idx);
-            scale /= 2;
-            // update the position of the candidate node
-            if (temp_node.position.x > position.x)
-                position.x += scale.x;
-            else
-                position.x -= scale.x;
-            if (temp_node.position.y > position.y)
-                position.y += scale.y;
-            else
-                position.y -= scale.y;
-            if (temp_node.position.z > position.z)
-                position.z += scale.z;
-            else
-                position.z -= scale.z;
-        }
-        if (n == 0)
-            Debug.LogError("Error in InsertTempNode"); 
+        var (idx, merged_idx) = Pos2Idx(temp_node.position);
         if (temp_node.idx == "start")
             start_idx = idx;
         if (temp_node.idx == "target")
@@ -213,27 +234,7 @@ public class AstarFast : MonoBehaviour
                 DrawPath(path_positions, Color.green);
             }
             // keep track of the nodes we cross and their distance along the path for the movement model and recomputing the path
-            // TODO make it work with funnel -> when adding a new anchor point, also add the positions of the intersections between the transitions and the line connecting the 2 anchors? (and pruning?)
-            float dist_along_path = Vector3.Distance(shortestPath[1].position, start);
-            path_idx = new List<(Vector3, string, float)> { (shortestPath[1].position, start_idx, dist_along_path) };
-            for (int i = 1; i<shortestPath.Count - 1; i++)
-            {
-                CustomNodeScriptable node = shortestPath[i];
-                dist_along_path += Vector3.Distance(node.position, shortestPath[i+1].position);
-                // a transition idx in the middle of the path is written idx1&idx2, and one of these idx is the previous entry in path_idx
-                string idx = path_idx.Last().Item2;
-                string[] li = node.idx.Split("&");
-                if (idx == li[0])
-                    path_idx.Add((shortestPath[i + 1].position, li[1], dist_along_path));
-                else
-                    path_idx.Add((shortestPath[i + 1].position, li[0], dist_along_path));
-            }
-            /*foreach (var tuple in path_idx)
-            {
-                Vector3 pos = tuple.Item1;
-                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                g.transform.position = pos;
-            } */
+            ComputePathIdx2(path_positions);
             path_length = PathLength(path_positions);
         }
         else
@@ -265,7 +266,6 @@ public class AstarFast : MonoBehaviour
             prioQueue = prioQueue.OrderBy(Heuristic).ToList();
             var node = prioQueue.First();
             prioQueue.Remove(node);
-            //Debug.Log("expanding" + node.name);
             foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
             {
                 CustomNodeScriptable childNode;
@@ -531,6 +531,79 @@ public class AstarFast : MonoBehaviour
             cur++;
         }
         g.transform.position = next + Math.Max(0, (d - distAlongPath)/(d-old_d)) * (previous - next);
+    }
+
+    public void ComputePathIdx2(List<Vector3> path)
+    {
+        float dist_along_path = 0;
+        string idx;
+        Vector3 previous = start;
+        Vector3 next;
+        path_idx = new List<(Vector3, string, float)>();
+        int i = 1;
+        while (i < path.Count)
+        {
+            next = path[i];
+            idx = Pos2Idx(previous + 1e-3f * (next - previous).normalized).Item2;
+            CustomNodeScriptable cn = data.FindNode(idx);
+            // compute the exit point of the node
+            Vector3 exit = ComputeExit(previous, next, cn);
+            // if it is not the next point in the path, get the pos2idx of a point just after the exit
+            if (Vector3.Distance(exit, next) > 1e-3)
+            {
+                var (_, merged_idx) = Pos2Idx(exit + 1e-3f * (next - previous).normalized);
+                // add the exit point to path_idx, with old_idx and the correct distance
+                dist_along_path += Vector3.Distance(previous, exit);
+                path_idx.Add((exit, idx, dist_along_path));
+                previous = exit;
+                idx = merged_idx;
+            }
+            // if it is the next point in the path, add it and restart with anchor = next and next = path[i+1]
+            else
+            {
+                dist_along_path += Vector3.Distance(previous, next);
+                path_idx.Add((exit, idx, dist_along_path));
+                previous = next;
+                i++;
+            }
+            
+        }
+    }
+
+    public Vector3 ComputeExit(Vector3 u, Vector3 v, CustomNodeScriptable cn)
+    {
+        // compute the exit point of cn along [u, v] assuming u is in cn and v is outside
+        // if v is inside cn simply return it
+        if (
+                (v.x >= cn.position.x - cn.scale.x / 2 && v.x <= cn.position.x + cn.scale.x / 2) &&
+                (v.y >= cn.position.y - cn.scale.y / 2 && v.y <= cn.position.y + cn.scale.y / 2) &&
+                (v.z >= cn.position.z - cn.scale.z / 2 && v.z <= cn.position.z + cn.scale.z / 2)
+                )
+            return v;
+            // this is the first point on the cube we encounter when starting from target
+            float[] candidate_t = new float[]
+        {
+            (Mathf.Abs(v.x - (cn.position.x + cn.scale.x / 2))/(Mathf.Abs(v.x - u.x))),
+            (Mathf.Abs(v.x - (cn.position.x - cn.scale.x / 2))/(Mathf.Abs(v.x - u.x))),
+            (Mathf.Abs(v.y - (cn.position.y + cn.scale.y / 2))/(Mathf.Abs(v.y - u.y))),
+            (Mathf.Abs(v.y - (cn.position.y - cn.scale.y / 2))/(Mathf.Abs(v.y - u.y))),
+            (Mathf.Abs(v.z - (cn.position.z + cn.scale.z / 2))/(Mathf.Abs(v.z - u.z))),
+            (Mathf.Abs(v.z - (cn.position.z - cn.scale.z / 2))/(Mathf.Abs(v.z - u.z))),
+        };
+        // one of these 6 points along [v, u] is the correct one, start from the closest to v
+        foreach (float t in candidate_t.OrderBy(x => x))
+        {
+            Vector3 w = (1 - t) * v + t * u;
+            // if w is inside the cube return it
+            if (
+                (w.x >= cn.position.x - cn.scale.x / 2 - 1e-3 && w.x <= cn.position.x + cn.scale.x / 2 + 1e-3) &&
+                (w.y >= cn.position.y - cn.scale.y / 2 - 1e-3 && w.y <= cn.position.y + cn.scale.y / 2 + 1e-3) &&
+                (w.z >= cn.position.z - cn.scale.z / 2 - 1e-3 && w.z <= cn.position.z + cn.scale.z / 2 + 1e-3)
+                )
+                return w;
+        }
+        Debug.LogError("exit not found!");
+        return new Vector3();
     }
 
     public List<string> CellsAhead()

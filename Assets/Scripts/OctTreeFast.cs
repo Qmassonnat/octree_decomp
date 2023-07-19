@@ -85,7 +85,7 @@ public class OctTreeFast : MonoBehaviour
             if (elongated_criteria > 0)
             {
                 t0 = Time.realtimeSinceStartupAsDouble;
-                PruneOctTree();
+                PruneOctTree(null, null);
                 Debug.Log("After pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
                 Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             }
@@ -156,8 +156,9 @@ public class OctTreeFast : MonoBehaviour
             ChangeType(node_, "Valid", "Node");
         }
         Vector3 current_scale = node_.scale;
-        if (current_scale.x > minSize)
+        if (current_scale.x > minSize || current_scale.y > minSize || current_scale.z > minSize)
         {
+            //Debug.Log("split " + node_.idx);
             foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
             {
                 // remove the transitions between the split node and its neighbors
@@ -188,6 +189,7 @@ public class OctTreeFast : MonoBehaviour
         // if  we reached the minimum size, make the node invalid
         else
         {
+            //Debug.Log("making invalid " + node_.idx);
             data.UpdateNeighborsOnInvalid(node_);
             ChangeType(node_, "Node", "Invalid");
             foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
@@ -209,10 +211,22 @@ public class OctTreeFast : MonoBehaviour
         return corner + scale / 2;
     }
 
-    public void PruneOctTree()
+    public void PruneOctTree(List<CustomNodeScriptable> validNodes, List<CustomNodeScriptable> invalidNodes)
     {
-        Stack validStack = new Stack(data.validNodes.Values);
-        Stack invalidStack = new Stack(data.invalidNodes.Values);
+        Stack validStack = new Stack();
+        Stack invalidStack = new Stack();
+        if (validNodes == null && invalidNodes == null)
+        {
+            validStack = new Stack(data.validNodes.Values);
+            invalidStack = new Stack(data.invalidNodes.Values);
+        }
+        else
+        {
+            if (validNodes != null)
+                validStack = new Stack(validNodes);
+            if (invalidNodes != null)
+                invalidStack = new Stack(invalidNodes);
+        }
         while (validStack.Count > 0)
         {
             CustomNodeScriptable n1 = (CustomNodeScriptable)validStack.Pop();
@@ -237,6 +251,7 @@ public class OctTreeFast : MonoBehaviour
                     if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && n2.invalid_neighbors[opposite].Count == 0 && !elongated)
                     {
                         data.deletedNodes[n2.idx] = n1.idx;
+                        //Debug.Log("merging " + n1.idx + " " + n2.idx);
                         MergeNeighbors(n1, n2, key);
                         // add n1 again to check if this merge enabled further merges
                         validStack.Push(n1);
@@ -612,52 +627,61 @@ public class OctTreeFast : MonoBehaviour
                 transitions_add.Add((node.idx, neigh));
         }
         data.UpdateNeighborsOnValid(node);
-        // try merging it with its neighbors if all children nodes are valid
-        CustomNodeScriptable parent = data.FindNode(node.parent);
-        // if the parent was already repaired or we are at the root, quit
-        if (parent == null || parent.tag == "Valid")
-            return;
-        bool merge = true;
-        while (merge)
+
+        // if this is a merged octtree, instead of reparing the parent start a greedy merge from the repaired node
+        if (elongated_criteria > 0)
         {
-            foreach (string child_idx in parent.children)
+            Debug.Log("starting from " + node.idx);
+            PruneOctTree(new List<CustomNodeScriptable> { node }, null);
+        }
+        else
+        {
+            // try merging it with its neighbors if all children nodes are valid
+            CustomNodeScriptable parent = data.FindNode(node.parent);
+            // if the parent was already repaired or we are at the root, quit
+            if (parent == null || parent.tag == "Valid")
+                return;
+            bool merge = true;
+            while (merge)
             {
-                CustomNodeScriptable child = data.FindNode(child_idx);
-                if (child.tag == "Invalid" || child.tag == "Node")
-                    merge = false;
-            }
-            if (merge)
-            {
-                data.UpdateNeighborsOnMerge(parent);
                 foreach (string child_idx in parent.children)
                 {
                     CustomNodeScriptable child = data.FindNode(child_idx);
-                    // remove all transitions with the child
-                    foreach (KeyValuePair<string, List<string>> entry in child.valid_neighbors)
+                    if (child.tag == "Invalid" || child.tag == "Node")
+                        merge = false;
+                }
+                if (merge)
+                {
+                    data.UpdateNeighborsOnMerge(parent);
+                    foreach (string child_idx in parent.children)
+                    {
+                        CustomNodeScriptable child = data.FindNode(child_idx);
+                        // remove all transitions with the child
+                        foreach (KeyValuePair<string, List<string>> entry in child.valid_neighbors)
+                        {
+                            // add a transition between the now valid node and all of its valid neighbors
+                            foreach (string neigh in entry.Value)
+                                transitions_remove.Add((child.idx, neigh));
+                        }
+                        data.validNodes.Remove(child.idx);
+                        DestroyImmediate(child);
+                    }
+                    ChangeType(parent, "Node", "Valid");
+                    foreach (KeyValuePair<string, List<string>> entry in parent.valid_neighbors)
                     {
                         // add a transition between the now valid node and all of its valid neighbors
                         foreach (string neigh in entry.Value)
-                            transitions_remove.Add((child.idx, neigh));
+                            transitions_add.Add((parent.idx, neigh));
                     }
-                    data.validNodes.Remove(child.idx);
-                    DestroyImmediate(child);
                 }
-                ChangeType(parent, "Node", "Valid");
-                foreach (KeyValuePair<string, List<string>> entry in parent.valid_neighbors)
-                {
-                    // add a transition between the now valid node and all of its valid neighbors
-                    foreach (string neigh in entry.Value)
-                        transitions_add.Add((parent.idx, neigh));
-                }
+                node = parent;
+                if (node.parent != null)
+                    parent = data.FindNode(node.parent);
+                else
+                    // we reached the root node
+                    merge = false;
             }
-            node = parent;
-            if (node.parent != null)
-                parent = data.FindNode(node.parent);
-            else
-                // we reached the root node
-                merge = false;
-        }
-
+        }   
     }
 
     public void ChangeType(CustomNodeScriptable cn, string old_type, string new_type)
