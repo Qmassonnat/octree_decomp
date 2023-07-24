@@ -55,8 +55,10 @@ public class WarframeMap : MonoBehaviour
         List<double> time = new List<double>();
         StreamReader sr = new StreamReader(test_path);
         string s = sr.ReadLine();
-        while (s != null)
+        int i = 5;
+        while (i>0 && s != null)
         {
+            i--;
             string[] li = s.Split(" ");
             Vector3 start = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
             Vector3 target = new Vector3(float.Parse(li[3]), float.Parse(li[4]), float.Parse(li[5])) - offset;

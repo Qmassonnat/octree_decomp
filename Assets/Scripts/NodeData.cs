@@ -104,6 +104,8 @@ public class NodeData : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the parent entry and add the correct children entries
+                if (neigh == null)
+                    Debug.Log("spliterror");
                 List<string> n_list = neigh.valid_neighbors[GetOppositeDirection(entry.Key)];
                 n_list.Remove(cn.idx);
                 // if the node is larger or has not been split yet

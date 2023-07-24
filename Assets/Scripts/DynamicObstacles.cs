@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class DynamicObstacles : MonoBehaviour
 {
@@ -9,8 +10,13 @@ public class DynamicObstacles : MonoBehaviour
     public float obs_size = 3;
     public float obs_speed = 5;
     private List<GameObject> obs_list = new List<GameObject>();
+    // for linear mvt, store a random velocity
     private List<Vector3> obs_vel = new List<Vector3>();
-    // moves the obstacles toward a position, make them randomly orbit around said position then assign a new position
+    // for mvt in octtree, store a target and the list of cell the obstacle will go through to reach it
+    private List<CustomNodeScriptable> obs_target = new List<CustomNodeScriptable>();
+    private List<List<Vector3>> intermediate_target = new List<List<Vector3>>();
+
+    // for erratic mvt, moves the obstacles toward a position, make them randomly orbit around said position then assign a new position
     private List<(Vector3, float)> erratic_mvt = new List<(Vector3, float)>();
     private float bound;
     private float zBound;
@@ -40,7 +46,7 @@ public class DynamicObstacles : MonoBehaviour
             zBound = 20;
             Debug.LogError("Pathfinding component inactive");
         }
-        AddAsteroids(obs_number);
+        //AddAsteroids(obs_number);
     }
 
     public void AddAsteroids(int n)
@@ -116,7 +122,87 @@ public class DynamicObstacles : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MoveErratic();
+        //MoveErratic();
         //MoveAsteroids();
+        if (gameObject.CompareTag("Finished"))
+        {
+            if (obs_list.Count == 0)
+                AddObstaclesInOctTree();
+            else
+                MoveInOctTree();
+        }
+    }
+
+    public void AddObstaclesInOctTree()
+    {
+        // add  obs_number obstacles at the center of random valid octtree cells
+        OctTreeFast oc = GetComponent<OctTreeFast>();
+        int n = oc.data.validNodes.Count;
+        for (int i = 0; i<obs_number; i++)
+        {
+            int j = Random.Range(0, n);
+            var cn = oc.data.nodes.ElementAt(j).Value;
+            if (cn.idx == "start" || cn.idx == "target")
+                cn = oc.data.nodes.ElementAt((j+2)%n).Value;
+            GameObject obs = GameObject.Instantiate(obstacle);
+            obs.transform.localScale = obs_size * Vector3.one;
+            obs.transform.position = cn.position;
+            obs_list.Add(obs);
+            obs_target.Add(cn);
+            intermediate_target.Add(new List<Vector3>());
+        }
+    }
+
+    public void MoveInOctTree()
+    {
+        AstarFast pf = GetComponent<AstarFast>();
+        int n = pf.data.validNodes.Count;
+        for (int i = 0; i < obs_list.Count; i++)
+        {
+            GameObject obs = obs_list[i];
+            // move every obstacle towards the center of another random valid octtree cell, store the list of intermediate cells that it needs to traverse
+            if (Vector3.Distance(obs.transform.position, obs_target[i].position) < 0.01f)
+            {
+                // when it has reached its target, randomly select another cell and repeat
+                int j = Random.Range(0, n);
+                var new_target = pf.data.nodes.ElementAt(j).Value;
+                if (new_target.idx == "start" || new_target.idx == "target")
+                    new_target = pf.data.nodes.ElementAt((j + 2) % n).Value;
+                // if the octtree was updated and the node no longer exists, restart from another point
+                if (!pf.data.nodes.ContainsKey(obs_target[i].idx))
+                {
+                    intermediate_target[i] = new List<Vector3> { new_target.position };
+                }
+                else
+                {
+                    // store the path the obstacle will take
+                    try
+                    {
+                        intermediate_target[i] = pf.ComputePath(obs_target[i], new_target);
+                    }
+                    catch
+                    {
+                        intermediate_target[i] = new List<Vector3> { new_target.position };
+                    }
+                }
+                obs_target[i] = new_target;
+            }
+            else
+            {
+                Vector3 intermediate = intermediate_target[i].First();
+                Vector3 pos = obs_list[i].transform.position;
+                if (Vector3.Distance(pos, intermediate) < 0.1)
+                {
+                    obs_list[i].transform.position = intermediate;
+                    intermediate_target[i].Remove(intermediate_target[i].First());
+                }
+                else
+                {
+                    // move along the computed path stored in intermediate_target
+                    obs_list[i].transform.position = pos + obs_speed * ((intermediate - pos).normalized * Time.deltaTime);
+                }
+            }
+        }
+
     }
 }

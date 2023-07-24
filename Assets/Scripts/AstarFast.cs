@@ -195,8 +195,9 @@ public class AstarFast : MonoBehaviour
         {
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
+            //double t1 = Time.realtimeSinceStartupAsDouble;
             AstarSearch();
-
+            //Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             CustomNodeScriptable cn = targetNode;
             while (cn.nearest_to_start != startNode)
             {
@@ -234,7 +235,7 @@ public class AstarFast : MonoBehaviour
                 DrawPath(path_positions, Color.green);
             }
             // keep track of the nodes we cross and their distance along the path for the movement model and recomputing the path
-            if (move) 
+            if (move)
                 ComputePathIdx2(path_positions);
             path_length = PathLength(path_positions);
         }
@@ -244,7 +245,7 @@ public class AstarFast : MonoBehaviour
             data.path_cells.Add(start_idx);
             path_length = Vector3.Distance(startNode.position, targetNode.position);
         }
-        
+
         // remove the temporary edges
         foreach (string key in temp_edges.Keys)
         {
@@ -253,6 +254,7 @@ public class AstarFast : MonoBehaviour
         }
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double dt = (Time.realtimeSinceStartupAsDouble - t0);
+       // Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         return (nb_visited, path_length, dt);
     }
 
@@ -264,7 +266,8 @@ public class AstarFast : MonoBehaviour
         prioQueue.Add(startNode);
         do
         {
-            prioQueue = prioQueue.OrderBy(Heuristic).ToList();
+            // prioQueue can get very long, instead of sorting everything insert the few values we added
+            // maybe try with only string in the queue and then data.FindNode?
             var node = prioQueue.First();
             prioQueue.Remove(node);
             foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
@@ -285,7 +288,7 @@ public class AstarFast : MonoBehaviour
                     childNode.cost_to_start = node.cost_to_start + cost;
                     childNode.nearest_to_start = node;
                     if (!prioQueue.Contains(childNode))
-                        prioQueue.Add(childNode);
+                        InsertInQueue(prioQueue, childNode);
                 }
             }
             node.visited = true;
@@ -293,6 +296,71 @@ public class AstarFast : MonoBehaviour
             if (node.idx == targetNode.idx)
                 return;
         } while (prioQueue.Any());
+    }
+
+    public List<Vector3> ComputePath(CustomNodeScriptable s, CustomNodeScriptable t)
+    {
+        List<Vector3> path = new List<Vector3>();
+        if (s != t)
+        {
+            foreach (var node in data.nodes.Values)
+                node.ResetNode(target);
+            s.cost_to_start = 0;
+            var prioQueue = new List<CustomNodeScriptable>();
+            prioQueue.Add(s);
+            do
+            {
+                // prioQueue can get very long, instead of sorting everything insert the few values we added
+                // maybe try with only string in the queue and then data.FindNode?
+                var node = prioQueue.First();
+                prioQueue.Remove(node);
+                foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
+                {
+                    CustomNodeScriptable childNode;
+                    if (idx != s.idx && idx != t.idx && !data.nodes.ContainsKey(idx))
+                    {
+                        string inv_idx = idx.Split('&')[1] + "&" + idx.Split('&')[0];
+                        childNode = data.nodes[inv_idx];
+                    }
+                    else
+                        childNode = data.nodes[idx];
+                    if (childNode.visited)
+                        continue;
+                    if (childNode.cost_to_start == -1 ||
+                        node.cost_to_start + cost < childNode.cost_to_start)
+                    {
+                        childNode.cost_to_start = node.cost_to_start + cost;
+                        childNode.nearest_to_start = node;
+                        if (!prioQueue.Contains(childNode))
+                            InsertInQueue(prioQueue, childNode);
+                    }
+                }
+                node.visited = true;
+                if (node.idx == t.idx)
+                    break;
+            } while (prioQueue.Any());
+            CustomNodeScriptable cn = t;
+            while (cn.nearest_to_start != s)
+            {
+                path.Add(cn.position);
+                cn = cn.nearest_to_start;
+            }
+            path.Add(cn.position);
+            path.Add(s.position);
+            path.Reverse();
+            return path;
+        }
+        else 
+            return new List<Vector3> { s.position };
+    }
+
+    public void InsertInQueue(List<CustomNodeScriptable> queue, CustomNodeScriptable cn)
+    {
+        int cur = 0;
+        float heuristic = Heuristic(cn);
+        while (cur < queue.Count && Heuristic(queue[cur]) < heuristic)
+            cur++;
+        queue.Insert(cur, cn);
     }
 
     public void DrawPath(List<Vector3> path, Color color)

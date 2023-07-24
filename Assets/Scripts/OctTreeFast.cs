@@ -432,12 +432,10 @@ public class OctTreeFast : MonoBehaviour
             trans_idx = (n1.idx, n2.idx);
             transition.name = n1.idx + "&" + n2.idx;
             transition.idx = n1.idx + "&" + n2.idx;
-            Vector3 cn_pos = n1.position;
-            Vector3 neigh_pos = n2.position;
             transition.position = new Vector3(
-                    (Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2) + Mathf.Min(cn_pos.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2)) / 2,
-                    (Mathf.Max(n1.position.y - n1.scale.y / 2, n2.position.y - n2.scale.y / 2) + Mathf.Min(cn_pos.y + n1.scale.y / 2, n2.position.y + n2.scale.y / 2)) / 2,
-                    (Mathf.Max(n1.position.z - n1.scale.z / 2, n2.position.z - n2.scale.z / 2) + Mathf.Min(cn_pos.z + n1.scale.z / 2, n2.position.z + n2.scale.z / 2)) / 2);
+                    (Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2) + Mathf.Min(n1.position.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2)) / 2,
+                    (Mathf.Max(n1.position.y - n1.scale.y / 2, n2.position.y - n2.scale.y / 2) + Mathf.Min(n1.position.y + n1.scale.y / 2, n2.position.y + n2.scale.y / 2)) / 2,
+                    (Mathf.Max(n1.position.z - n1.scale.z / 2, n2.position.z - n2.scale.z / 2) + Mathf.Min(n1.position.z + n1.scale.z / 2, n2.position.z + n2.scale.z / 2)) / 2);
             // we use scale to store the size of the connecting surface
             transition.scale = new Vector3(
                 Mathf.Min(n1.position.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2) - Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2),
@@ -472,7 +470,8 @@ public class OctTreeFast : MonoBehaviour
             foreach (string other_idx in edges_to_add)
             {
                 CustomNodeScriptable other_tr = data.nodes[other_idx];
-                if (!other_tr.edges.Contains((transition.idx, Vector3.Distance(transition.position, other_tr.position)))) {
+                if (!other_tr.edges.Contains((transition.idx, Vector3.Distance(transition.position, other_tr.position))))
+                {
                     transition.edges.Add((other_tr.idx, Vector3.Distance(transition.position, other_tr.position)));
                     other_tr.edges.Add((transition.idx, Vector3.Distance(transition.position, other_tr.position)));
                 }
@@ -496,6 +495,8 @@ public class OctTreeFast : MonoBehaviour
             {
                 CustomNodeScriptable neigh = data.nodes[edge.Item1];
                 var back_edge = (tr_idx, edge.Item2);
+                if (!neigh.edges.Contains((tr_idx, edge.Item2)))
+                    Debug.LogError("edge");
                 neigh.edges.Remove(back_edge);
             }
             data.nodes.Remove(tr_idx);
@@ -580,7 +581,7 @@ public class OctTreeFast : MonoBehaviour
             }
         }
         // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        if (!GetComponent<AstarFast>().move)
+        if (!GetComponent<AstarFast>().move && !GetComponent<DynamicObstacles>().isActiveAndEnabled)
             path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {
@@ -595,7 +596,7 @@ public class OctTreeFast : MonoBehaviour
             to_split = new List<CustomNodeScriptable>();
             to_repair = new List<CustomNodeScriptable>();
 
-            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            //Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph with a local update method
             UpdateGraph();
@@ -611,7 +612,7 @@ public class OctTreeFast : MonoBehaviour
                     Debug.Log("start or target inside of obstacle");
                 }
             }
-            Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            //Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
 
         
