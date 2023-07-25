@@ -342,44 +342,54 @@ public class NodeData : ScriptableObject
 
     public void SaveData(string filename) 
     {
+        Debug.Log(nodes.Count + " nodes " + validNodes.Count + " valid cells");
         string path = "Assets/Data/" + filename;
-        if (!AssetDatabase.IsValidFolder(path))
+        if (AssetDatabase.IsValidFolder(path))
+            Directory.Delete(path, true);
+        AssetDatabase.CreateFolder("Assets/Data", filename);
+        CustomNodeScriptable valid = CreateInstance<CustomNodeScriptable>();
+        AssetDatabase.CreateAsset(valid, path + "/valid.asset");
+        foreach (string key in validNodes.Keys)
         {
-            AssetDatabase.CreateFolder("Assets/Data", filename);
-
-            CustomNodeScriptable valid = CreateInstance<CustomNodeScriptable>();
-            AssetDatabase.CreateAsset(valid, path + "/valid.asset");
-            foreach (string key in validNodes.Keys)
-            {
-                CustomNodeScriptable cn = validNodes[key];
-                cn.SaveNeighbors();
-                AssetDatabase.AddObjectToAsset(cn, valid);
-            }
-            AssetDatabase.ImportAsset(path + "/valid.asset");
-
-            CustomNodeScriptable invalid = CreateInstance<CustomNodeScriptable>();
-            AssetDatabase.CreateAsset(invalid, path + "/invalid.asset");
-            foreach (string key in invalidNodes.Keys)
-            {
-                CustomNodeScriptable cn = invalidNodes[key];
-                cn.SaveNeighbors();
-                AssetDatabase.AddObjectToAsset(cn, invalid);
-            }
-            AssetDatabase.ImportAsset(path + "/invalid.asset");
-
-            CustomNodeScriptable nodeList = CreateInstance<CustomNodeScriptable>();
-            AssetDatabase.CreateAsset(nodeList, path + "/nodes.asset");
-            foreach (string key in nodes.Keys)
-            {
-                CustomNodeScriptable cn = nodes[key];
-                cn.SaveEdges();
-                AssetDatabase.AddObjectToAsset(cn, nodeList);
-            }
-            AssetDatabase.ImportAsset(path + "/nodes.asset");
-            deleted = CreateInstance<DeletedNodes>();
-            deleted.Save(deletedNodes);
-            AssetDatabase.CreateAsset(deleted, path + "/deleted.asset");
+            CustomNodeScriptable cn = validNodes[key];
+            cn.SaveNeighbors();
+            AssetDatabase.AddObjectToAsset(cn, valid);
         }
+        AssetDatabase.ImportAsset(path + "/valid.asset");
+
+        CustomNodeScriptable invalid = CreateInstance<CustomNodeScriptable>();
+        AssetDatabase.CreateAsset(invalid, path + "/invalid.asset");
+        foreach (string key in invalidNodes.Keys)
+        {
+            CustomNodeScriptable cn = invalidNodes[key];
+            cn.SaveNeighbors();
+            AssetDatabase.AddObjectToAsset(cn, invalid);
+        }
+        AssetDatabase.ImportAsset(path + "/invalid.asset");
+
+        CustomNodeScriptable nodeList = CreateInstance<CustomNodeScriptable>();
+        AssetDatabase.CreateAsset(nodeList, path + "/nodes.asset");
+        foreach (string key in nodes.Keys)
+        {
+            CustomNodeScriptable cn = nodes[key];
+            cn.SaveEdges();
+            AssetDatabase.AddObjectToAsset(cn, nodeList);
+        }
+        AssetDatabase.ImportAsset(path + "/nodes.asset");
+
+        CustomNodeScriptable cell = CreateInstance<CustomNodeScriptable>();
+        AssetDatabase.CreateAsset(cell, path + "/cells.asset");
+        foreach (string key in cells.Keys)
+        {
+            CustomNodeScriptable cn = cells[key];
+            cn.SaveNeighbors();
+            AssetDatabase.AddObjectToAsset(cn, invalid);
+        }
+        AssetDatabase.ImportAsset(path + "/cells.asset");
+
+        deleted = CreateInstance<DeletedNodes>();
+        deleted.Save(deletedNodes);
+        AssetDatabase.CreateAsset(deleted, path + "/deleted.asset");
     }
 
     public void LoadData(string path)
@@ -411,6 +421,15 @@ public class NodeData : ScriptableObject
                 cn.LoadEdges();
             }
         }
+        foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/cells.asset"))
+        {
+            if (cn.name != "cell")
+            {
+                cells[cn.idx] = cn;
+                cn.LoadNeighbors();
+            }
+        }
+
         deleted = (DeletedNodes)AssetDatabase.LoadAssetAtPath(path +"/deleted.asset", typeof(DeletedNodes));
         deleted.Load();
         deletedNodes = deleted.deleted;

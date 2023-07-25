@@ -22,7 +22,7 @@ public class AstarFast : MonoBehaviour
     private CustomNodeScriptable targetNode;
     private string start_idx;
     private string target_idx;
-    private bool done;
+    [HideInInspector] public bool done;
     private int nb_visited;
     private float distAlongPath = 0;
     private List<(Vector3, string, float)> path_idx = new List<(Vector3, string, float)>();
@@ -209,6 +209,7 @@ public class AstarFast : MonoBehaviour
             shortestPath.Reverse();
 
             // path refining
+            data.path_cells = new List<string>();
             foreach (CustomNodeScriptable n in shortestPath)
             {
                 path_positions.Add(n.position);

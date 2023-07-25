@@ -495,8 +495,6 @@ public class OctTreeFast : MonoBehaviour
             {
                 CustomNodeScriptable neigh = data.nodes[edge.Item1];
                 var back_edge = (tr_idx, edge.Item2);
-                if (!neigh.edges.Contains((tr_idx, edge.Item2)))
-                    Debug.LogError("edge");
                 neigh.edges.Remove(back_edge);
             }
             data.nodes.Remove(tr_idx);
@@ -581,7 +579,7 @@ public class OctTreeFast : MonoBehaviour
             }
         }
         // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        if (!GetComponent<AstarFast>().move && !GetComponent<DynamicObstacles>().isActiveAndEnabled)
+        if (!GetComponent<AstarFast>().move && GetComponent<DynamicObstacles>()!=null && GetComponent<DynamicObstacles>().isActiveAndEnabled)
             path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {

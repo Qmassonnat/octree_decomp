@@ -124,7 +124,7 @@ public class DynamicObstacles : MonoBehaviour
     {
         //MoveErratic();
         //MoveAsteroids();
-        if (gameObject.CompareTag("Finished"))
+        if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarFast>().done)
         {
             if (obs_list.Count == 0)
                 AddObstaclesInOctTree();
@@ -199,7 +199,7 @@ public class DynamicObstacles : MonoBehaviour
                 else
                 {
                     // move along the computed path stored in intermediate_target
-                    obs_list[i].transform.position = pos + obs_speed * ((intermediate - pos).normalized * Time.deltaTime);
+                    obs_list[i].transform.position = pos + obs_speed * Mathf.Min(1, Vector3.Distance(intermediate, pos)) * (intermediate - pos).normalized * Time.deltaTime;
                 }
             }
         }
