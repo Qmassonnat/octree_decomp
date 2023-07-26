@@ -193,9 +193,11 @@ public class AstarFast : MonoBehaviour
         float path_length=0;
         if (start_idx != target_idx)
         {
+            //double t1 = Time.realtimeSinceStartupAsDouble;
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
-            //double t1 = Time.realtimeSinceStartupAsDouble;
+            //Debug.Log("reset " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
+            //t1 = Time.realtimeSinceStartup;
             AstarSearch();
             //Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             CustomNodeScriptable cn = targetNode;
@@ -255,7 +257,7 @@ public class AstarFast : MonoBehaviour
         }
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double dt = (Time.realtimeSinceStartupAsDouble - t0);
-       // Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+        //Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         return (nb_visited, path_length, dt);
     }
 

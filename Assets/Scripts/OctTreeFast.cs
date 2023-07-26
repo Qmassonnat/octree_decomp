@@ -133,18 +133,14 @@ public class OctTreeFast : MonoBehaviour
 
         // if there is an obstacle in the node split it
         if (!GetComponent<CollisionCheck>().IsEmpty(position, scale))
-        {
             to_split.Add(new_node);
-        }
         else
         {
             // if the node is valid, update the graph
             foreach (KeyValuePair<string, List<string>> entry in new_node.valid_neighbors)
-            {
                 // add the transitions between the new node and its neighbors
                 foreach (string neigh in entry.Value)
                     transitions_add.Add((new_node.idx, neigh));
-            }
         }
     }
 
@@ -152,13 +148,10 @@ public class OctTreeFast : MonoBehaviour
     {
         // if this was a valid leaf turn it into a node
         if (node_.tag == "Valid")
-        {
             ChangeType(node_, "Valid", "Node");
-        }
         Vector3 current_scale = node_.scale;
         if (current_scale.x > minSize || current_scale.y > minSize || current_scale.z > minSize)
         {
-            //Debug.Log("split " + node_.idx);
             foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
             {
                 // remove the transitions between the split node and its neighbors
@@ -189,7 +182,6 @@ public class OctTreeFast : MonoBehaviour
         // if  we reached the minimum size, make the node invalid
         else
         {
-            //Debug.Log("making invalid " + node_.idx);
             data.UpdateNeighborsOnInvalid(node_);
             ChangeType(node_, "Node", "Invalid");
             foreach (KeyValuePair<string, List<string>> entry in node_.valid_neighbors)
@@ -579,8 +571,7 @@ public class OctTreeFast : MonoBehaviour
             }
         }
         // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        if (!GetComponent<AstarFast>().move && GetComponent<DynamicObstacles>()!=null && GetComponent<DynamicObstacles>().isActiveAndEnabled)
-            path_blocked = to_repair.Count > 0 || to_split.Count > 0;
+        //path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {
             while (to_split.Count > 0)
@@ -594,7 +585,7 @@ public class OctTreeFast : MonoBehaviour
             to_split = new List<CustomNodeScriptable>();
             to_repair = new List<CustomNodeScriptable>();
 
-            //Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph with a local update method
             UpdateGraph();
@@ -610,7 +601,7 @@ public class OctTreeFast : MonoBehaviour
                     Debug.Log("start or target inside of obstacle");
                 }
             }
-            //Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
 
         

@@ -137,7 +137,7 @@ public class DynamicObstacles : MonoBehaviour
     {
         // add  obs_number obstacles at the center of random valid octtree cells
         OctTreeFast oc = GetComponent<OctTreeFast>();
-        int n = oc.data.validNodes.Count;
+        int n = oc.data.nodes.Count;
         for (int i = 0; i<obs_number; i++)
         {
             int j = Random.Range(0, n);

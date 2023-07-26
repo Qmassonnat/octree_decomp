@@ -104,8 +104,6 @@ public class NodeData : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the parent entry and add the correct children entries
-                if (neigh == null)
-                    Debug.Log("spliterror");
                 List<string> n_list = neigh.valid_neighbors[GetOppositeDirection(entry.Key)];
                 n_list.Remove(cn.idx);
                 // if the node is larger or has not been split yet
@@ -342,18 +340,18 @@ public class NodeData : ScriptableObject
 
     public void SaveData(string filename) 
     {
-        Debug.Log(nodes.Count + " nodes " + validNodes.Count + " valid cells");
         string path = "Assets/Data/" + filename;
         if (AssetDatabase.IsValidFolder(path))
             Directory.Delete(path, true);
         AssetDatabase.CreateFolder("Assets/Data", filename);
+
         CustomNodeScriptable valid = CreateInstance<CustomNodeScriptable>();
         AssetDatabase.CreateAsset(valid, path + "/valid.asset");
         foreach (string key in validNodes.Keys)
         {
             CustomNodeScriptable cn = validNodes[key];
             cn.SaveNeighbors();
-            AssetDatabase.AddObjectToAsset(cn, valid);
+            AssetDatabase.AddObjectToAsset(cn.Clone(), valid);
         }
         AssetDatabase.ImportAsset(path + "/valid.asset");
 
@@ -363,7 +361,7 @@ public class NodeData : ScriptableObject
         {
             CustomNodeScriptable cn = invalidNodes[key];
             cn.SaveNeighbors();
-            AssetDatabase.AddObjectToAsset(cn, invalid);
+            AssetDatabase.AddObjectToAsset(cn.Clone(), invalid);
         }
         AssetDatabase.ImportAsset(path + "/invalid.asset");
 
@@ -373,7 +371,7 @@ public class NodeData : ScriptableObject
         {
             CustomNodeScriptable cn = nodes[key];
             cn.SaveEdges();
-            AssetDatabase.AddObjectToAsset(cn, nodeList);
+            AssetDatabase.AddObjectToAsset(cn.Clone(), nodeList);
         }
         AssetDatabase.ImportAsset(path + "/nodes.asset");
 
@@ -383,7 +381,7 @@ public class NodeData : ScriptableObject
         {
             CustomNodeScriptable cn = cells[key];
             cn.SaveNeighbors();
-            AssetDatabase.AddObjectToAsset(cn, invalid);
+            AssetDatabase.AddObjectToAsset(cn.Clone(), cell);
         }
         AssetDatabase.ImportAsset(path + "/cells.asset");
 
@@ -396,37 +394,41 @@ public class NodeData : ScriptableObject
     {
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/valid.asset"))
         {
-            if (cn.name != "valid")
+            var cn_copy = cn.Clone();
+            if (cn_copy.name != "valid")
             {
-                validNodes[cn.idx] = cn;
-                cn.LoadNeighbors();
+                validNodes[cn_copy.idx] = cn_copy;
+                cn_copy.LoadNeighbors();
             }
         }
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/invalid.asset"))
         {
-            if (cn.name != "invalid")
+            var cn_copy = cn.Clone();
+            if (cn_copy.name != "invalid")
             {
                 //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //g.transform.position = cn.position;
-                //g.transform.localScale = cn.scale;
-                invalidNodes[cn.idx] = cn;
-                cn.LoadNeighbors();
+                //g.transform.position = cn_copy.position;
+                //g.transform.localScale = cn_copy.scale;
+                invalidNodes[cn_copy.idx] = cn_copy;
+                cn_copy.LoadNeighbors();
             }
         }
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/nodes.asset"))
         {
-            if (cn.name != "nodes")
+            var cn_copy = cn.Clone();
+            if (cn_copy.name != "nodes")
             {
-                nodes[cn.idx] = cn;
-                cn.LoadEdges();
+                nodes[cn_copy.idx] = cn_copy;
+                cn_copy.LoadEdges();
             }
         }
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/cells.asset"))
         {
-            if (cn.name != "cell")
+            var cn_copy = cn.Clone();
+            if (cn_copy.name != "cells")
             {
-                cells[cn.idx] = cn;
-                cn.LoadNeighbors();
+                cells[cn_copy.idx] = cn_copy;
+                cn_copy.LoadNeighbors();
             }
         }
 
