@@ -3,13 +3,12 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-public class NodeData : ScriptableObject
+public class NodeDataMerged : ScriptableObject
 {
     public Dictionary<string, CustomNodeScriptable> cells = new Dictionary<string, CustomNodeScriptable>();
     public Dictionary<string, CustomNodeScriptable> validNodes = new Dictionary<string, CustomNodeScriptable>();
     public Dictionary<string, CustomNodeScriptable> invalidNodes = new Dictionary<string, CustomNodeScriptable>();
     public Dictionary<string, CustomNodeScriptable> nodes = new Dictionary<string, CustomNodeScriptable>();
-    public Dictionary<string, string> deletedNodes = new Dictionary<string, string>();
     public List<string> path_cells = new List<string>();
     public DeletedNodes deleted;
     private string[] directions = new string[] { "up", "down", "left", "right", "forward", "backward" };
@@ -25,73 +24,91 @@ public class NodeData : ScriptableObject
         return null;
     }
 
-    public (Dictionary<string, List<string>>, Dictionary<string, List<string>>) ComputeNeighbors(CustomNodeScriptable cn, int i)
+    public string IsNeighbor(CustomNodeScriptable c1, CustomNodeScriptable c2)
     {
-        // from the neighbors of a node about to be split, compute the correct neighbors for a child node
-        Dictionary<string, List<string>> new_valid_neighbors = new Dictionary<string, List<string>>(cn.valid_neighbors.Count,
-                                                            cn.valid_neighbors.Comparer);
+        string res;
+        // c1 and c2 are neighbors iff they share a side, i.e. if there is a strict overlap for 2 coordinates and an equality for the third
+        if ((c1.position.x + c1.scale.x/2 == c2.position.x - c2.scale.x/2 || c1.position.x - c1.scale.x/2 == c2.position.x + c2.scale.x/2)
+        && (c1.position.y + c1.scale.y/2 > c2.position.y - c2.scale.y/2) && (c1.position.y - c1.scale.y/2 < c2.position.y + c2.scale.y/2) 
+        && (c1.position.z + c1.scale.z/2 > c2.position.z - c2.scale.z/2) && (c1.position.z - c1.scale.z/2 < c2.position.z + c2.scale.z/2))
+        {
+            if (c1.position.x < c2.position.x)
+                res = "right";
+            else
+                res = "left";
+        }
+        else if ((c1.position.y + c1.scale.y/2 == c2.position.y - c2.scale.y/2 || c1.position.y - c1.scale.y/2 == c2.position.y + c2.scale.y/2)
+        && (c1.position.x + c1.scale.x/2 > c2.position.x - c2.scale.x/2) && (c1.position.x - c1.scale.x/2 < c2.position.x + c2.scale.x/2) 
+        && (c1.position.z + c1.scale.z/2 > c2.position.z - c2.scale.z/2) && (c1.position.z - c1.scale.z/2 < c2.position.z + c2.scale.z/2))
+        {
+            if (c1.position.y < c2.position.y)
+                res = "up";
+            else
+                res = "down";
+        }
+        
+        else if ((c1.position.z + c1.scale.z/2 == c2.position.z - c2.scale.z/2 || c1.position.z - c1.scale.z/2 == c2.position.z + c2.scale.z/2)
+            && (c1.position.x + c1.scale.x/2 > c2.position.x - c2.scale.x/2) && (c1.position.x - c1.scale.x/2 < c2.position.x + c2.scale.x/2) 
+            && (c1.position.y + c1.scale.y/2 > c2.position.y - c2.scale.y/2) && (c1.position.y - c1.scale.y/2 < c2.position.y + c2.scale.y/2)) {
+            if (c1.position.z < c2.position.z)
+                res = "forward";
+            else
+                res = "backward";
+        }
+        else
+            res = null;
+        // if they are neighbors, return the direction from c1 to c2
+        return res;
+    }
+
+    public (Dictionary<string, List<string>>, Dictionary<string, List<string>>) ComputeChildNeighbors(CustomNodeScriptable parent, CustomNodeScriptable child)
+    {
+        // from the neighbors of a node about to be split, compute the correct external neighbors for a child node
+        Dictionary<string, List<string>> new_valid_neighbors = new Dictionary<string, List<string>>(parent.valid_neighbors.Count,
+                                                            parent.valid_neighbors.Comparer);
         // copy the old dictionnary
-        foreach (KeyValuePair<string, List<string>> entry in cn.valid_neighbors)
+        foreach (KeyValuePair<string, List<string>> entry in parent.valid_neighbors)
         {
             new_valid_neighbors.Add(entry.Key, new List<string>(entry.Value));
         }
         // Remove the neighbors no longer connected to the child node
         foreach (string direction in directions)
         {
-            if (TestDirection(direction, i))
+            List<string> to_remove = new List<string>();
+            foreach (string neigh_idx in new_valid_neighbors[direction])
             {
-                new_valid_neighbors[direction] = new List<string> { };
-                // to avoid giving a children-sized neighbor to all children nodes
-                List<string> to_remove = new List<string>();
-                foreach (string neighbor in new_valid_neighbors[GetOppositeDirection(direction)])
-                {
-                    if (neighbor.Length > cn.idx.Length && ! (neighbor[cn.idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
-                        to_remove.Add(neighbor);
-                }
-                foreach (string neighbor in to_remove)
-                {
-                    new_valid_neighbors[GetOppositeDirection(direction)].Remove(neighbor);
-                }
+                CustomNodeScriptable neigh = FindNode(neigh_idx);
+                if (IsNeighbor(neigh, child) == null)
+                    to_remove.Add(neigh_idx);
             }
+            foreach (string neighbor in to_remove)
+                new_valid_neighbors[direction].Remove(neighbor);
         }
 
-        // Add the correct children as new neighbors
-        foreach (string direction in directions)
-        {
-            if (TestDirection(direction, i))
-                new_valid_neighbors[direction].Add(cn.idx + (i + Direction2Int(direction)).ToString());
-        }
-
-        Dictionary<string, List<string>> new_invalid_neighbors = new Dictionary<string, List<string>>(cn.invalid_neighbors.Count,
-                                                            cn.invalid_neighbors.Comparer);
+        Dictionary<string, List<string>> new_invalid_neighbors = new Dictionary<string, List<string>>(parent.invalid_neighbors.Count,
+                                                            parent.invalid_neighbors.Comparer);
         // copy the old dictionnary
-        foreach (KeyValuePair<string, List<string>> entry in cn.invalid_neighbors)
+        foreach (KeyValuePair<string, List<string>> entry in parent.invalid_neighbors)
         {
             new_invalid_neighbors.Add(entry.Key, new List<string>(entry.Value));
         }
         // Remove the neighbors no longer connected to the child node
         foreach (string direction in directions)
         {
-            if (TestDirection(direction, i))
+            List<string> to_remove = new List<string>();
+            foreach (string neigh_idx in new_invalid_neighbors[direction])
             {
-                new_invalid_neighbors[direction] = new List<string> { };
-                // to avoid giving a children-sized neighbor to all children nodes
-                List<string> to_remove = new List<string>();
-                foreach (string neighbor in new_invalid_neighbors[GetOppositeDirection(direction)])
-                {
-                    if (neighbor.Length > cn.idx.Length && !(neighbor[cn.idx.Length].ToString() == ((i + Direction2Int(direction)).ToString())))
-                        to_remove.Add(neighbor);
-                }
-                foreach (string neighbor in to_remove)
-                {
-                    new_invalid_neighbors[GetOppositeDirection(direction)].Remove(neighbor);
-                }
+                CustomNodeScriptable neigh = FindNode(neigh_idx);
+                if (IsNeighbor(neigh, child) == null)
+                    to_remove.Add(neigh_idx);
             }
+            foreach (string neighbor in to_remove)
+                new_invalid_neighbors[direction].Remove(neighbor);
         }
         return (new_valid_neighbors, new_invalid_neighbors);
     }
 
-    public void UpdateNeighborsOnSplit(CustomNodeScriptable cn)
+    public void UpdateNeighborsOnSplit(CustomNodeScriptable cn, List<CustomNodeScriptable> children)
     {
         // when splitting a node, update the adjacent nodes' neighbors to have the relevant smaller nodes
         foreach (KeyValuePair<string, List<string>> entry in cn.valid_neighbors)
@@ -104,16 +121,9 @@ public class NodeData : ScriptableObject
                 // remove the parent entry and add the correct children entries
                 List<string> n_list = neigh.valid_neighbors[GetOppositeDirection(entry.Key)];
                 n_list.Remove(cn.idx);
-                // if the node is larger or has not been split yet
-                if (neigh.idx.Length <= cn.idx.Length)
-                {
-                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(cn.idx, entry.Key));
-                }
-                // if the node has already been split
-                else
-                {
-                    int last = int.Parse(neigh.idx[cn.idx.Length].ToString()); ;
-                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { cn.idx + (last + Direction2Int(entry.Key)).ToString() });
+                foreach (var child in children) {
+                    if (IsNeighbor(neigh, child) != null)
+                        neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(child.idx);
                 }
             }
         }
@@ -128,16 +138,10 @@ public class NodeData : ScriptableObject
                 // remove the parent entry and add the correct children entries
                 List<string> n_list = neigh.invalid_neighbors[GetOppositeDirection(entry.Key)];
                 n_list.Remove(cn.idx);
-                // if the node is larger or has not been split yet
-                if (neigh.idx.Length <= cn.idx.Length)
+                foreach (var child in children)
                 {
-                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), GetNeighborsSplit(cn.idx, entry.Key));
-                }
-                // if the node has already been split
-                else
-                {
-                    int last = int.Parse(neigh.idx[cn.idx.Length].ToString());
-                    neigh.AddValidNeighbors(GetOppositeDirection(entry.Key), new List<string> { cn.idx + (last + Direction2Int(entry.Key)).ToString() });
+                    if (IsNeighbor(neigh, child) != null)
+                        neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(child.idx);
                 }
             }
         }
@@ -196,69 +200,8 @@ public class NodeData : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the node from valid neighbors and add it to invalid neighbors
-                    neigh.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
-                    neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(cn.idx);
-            }
-        }
-    }
-
-    public void UpdateNeighborsOnMerge(CustomNodeScriptable parent)
-    {
-        // compute the neighbors of the parent from the children's neighbors
-        // discard the old neighbor information of the parent
-        foreach (string direction in directions)
-        {
-            parent.valid_neighbors[direction] = new List<string>();
-            parent.invalid_neighbors[direction] = new List<string>();
-        }
-        foreach (string child_idx in parent.children)
-        {
-            CustomNodeScriptable child = FindNode(child_idx);
-            int i = int.Parse(child.idx[child.idx.Length - 1].ToString());
-            foreach (var direction in directions)
-            {
-                // only add the non-children neighbors
-                if (!TestDirection(direction, i))
-                {
-                    foreach (var neigh_idx in child.valid_neighbors[direction])
-                    {                                           
-                        // make sure the neighbor has not already been added
-                        if (!parent.valid_neighbors[direction].Contains(neigh_idx))
-                            parent.valid_neighbors[direction].Add(neigh_idx);
-                        // remove the child from the adjacent node's neighbor list
-                        CustomNodeScriptable neigh = FindNode(neigh_idx);
-                        neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(child.idx);
-                    }
-                    foreach (var neigh_idx in child.invalid_neighbors[direction])
-                    {
-                        if (!parent.invalid_neighbors[direction].Contains(neigh_idx))
-                            parent.invalid_neighbors[direction].Add(neigh_idx);
-                        // remove the child from the adjacent node's neighbor list
-                        CustomNodeScriptable neigh = FindNode(neigh_idx);
-                        neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(child.idx);
-                    }
-                }
-            }
-        }
-        // update the adjacent's neighbors to reference the parent and not the children
-        foreach (string direction in directions)
-        {
-            foreach (var neigh_idx in parent.valid_neighbors[direction])
-            {
-                // add the parent to the adjacent node's neighbor list
-                CustomNodeScriptable neigh = FindNode(neigh_idx);
-                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
-                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
-            }
-        }
-        foreach (string direction in directions)
-        {
-            foreach (var neigh_idx in parent.invalid_neighbors[direction])
-            {
-                // add the parent to the adjacent node's neighbor list
-                CustomNodeScriptable neigh = FindNode(neigh_idx);
-                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
-                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
+                neigh.invalid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
+                neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(cn.idx);
             }
         }
     }
@@ -335,7 +278,7 @@ public class NodeData : ScriptableObject
     }
 
 
-    public void SaveData(string filename) 
+    public void SaveData(string filename)
     {
         string path = "Assets/Data/" + filename;
         if (AssetDatabase.IsValidFolder(path))
@@ -381,10 +324,6 @@ public class NodeData : ScriptableObject
             AssetDatabase.AddObjectToAsset(cn.Clone(), cell);
         }
         AssetDatabase.ImportAsset(path + "/cells.asset");
-
-        deleted = CreateInstance<DeletedNodes>();
-        deleted.Save(deletedNodes);
-        AssetDatabase.CreateAsset(deleted, path + "/deleted.asset");
     }
 
     public void LoadData(string path)
@@ -403,9 +342,9 @@ public class NodeData : ScriptableObject
             var cn_copy = cn.Clone();
             if (cn_copy.name != "invalid")
             {
-                //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //g.transform.position = cn_copy.position;
-                //g.transform.localScale = cn_copy.scale;
+                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                g.transform.position = cn_copy.position;
+                g.transform.localScale = cn_copy.scale;
                 invalidNodes[cn_copy.idx] = cn_copy;
                 cn_copy.LoadNeighbors();
             }
@@ -428,10 +367,6 @@ public class NodeData : ScriptableObject
                 cn_copy.LoadNeighbors();
             }
         }
-
-        deleted = (DeletedNodes)AssetDatabase.LoadAssetAtPath(path +"/deleted.asset", typeof(DeletedNodes));
-        deleted.Load();
-        deletedNodes = deleted.deleted;
     }
 
 
