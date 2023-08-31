@@ -243,7 +243,6 @@ public class OctTreeFast : MonoBehaviour
                     if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && n2.invalid_neighbors[opposite].Count == 0 && !elongated)
                     {
                         data.deletedNodes[n2.idx] = n1.idx;
-                        //Debug.Log("merging " + n1.idx + " " + n2.idx);
                         MergeNeighbors(n1, n2, key);
                         // add n1 again to check if this merge enabled further merges
                         validStack.Push(n1);

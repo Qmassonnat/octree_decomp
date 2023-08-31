@@ -8,12 +8,10 @@ using UnityEngine.SceneManagement;
 
 public class OctTreeMerged : MonoBehaviour
 {
-    public GameObject vv;
-    public GameObject vi;
     public float minSize;
     public float bound;
     public float zBound;
-    public float elongated_criteria; // 0 for no merging, high values for aggressive merging
+    public float elongated_criteria=99; // 0 for no merging, high values for aggressive merging
     public bool load;
     [HideInInspector] public NodeDataMerged data;
     private List<CustomNodeScriptable> to_split = new List<CustomNodeScriptable>();
@@ -86,7 +84,7 @@ public class OctTreeMerged : MonoBehaviour
         }
         else if (task == "prune")
         {
-            //Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             Debug.Log("Before pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
             if (elongated_criteria > 0)
             {
@@ -100,18 +98,6 @@ public class OctTreeMerged : MonoBehaviour
 
         else if (task == "graph")
         {
-            foreach ( var cn in data.validNodes.Values)
-            {
-                GameObject g = Instantiate(vv);
-                g.transform.localScale = cn.scale;
-                g.transform.position = cn.position;
-            }
-            foreach (var cn in data.invalidNodes.Values)
-            {
-                GameObject g = Instantiate(vi);
-                g.transform.localScale = cn.scale;
-                g.transform.position = cn.position;
-            }
             t0 = Time.realtimeSinceStartupAsDouble;
             BuildGraph();
             task = "finished";
@@ -132,7 +118,6 @@ public class OctTreeMerged : MonoBehaviour
 
     public void BuildOctree(CustomNodeScriptable new_node)
     {
-        //Debug.Log("building" + new_node.idx);
         data.validNodes[new_node.idx] = new_node;
 
         // if there is an obstacle in the node split it
@@ -195,8 +180,6 @@ public class OctTreeMerged : MonoBehaviour
                 children.Add(child);
             }
             data.UpdateNeighborsOnSplit(node_, children);
-            //Debug.Log(children.Count);
-            //Debug.Log("split" + node_.idx + " into " + children[0].idx + " to " + children[children.Count-1].idx);
             foreach (CustomNodeScriptable child in children)
             {
                 // compute the exterior neighbors of the "child" node based off the parent's neighbors
@@ -321,7 +304,6 @@ public class OctTreeMerged : MonoBehaviour
                     if (n2.tag == "Valid" && n2.valid_neighbors[opposite].Count == 1 && n2.invalid_neighbors[opposite].Count == 0 && !elongated)
                     {
                         MergeNeighbors(n1, n2, key);
-                        //Debug.Log("merging" + n1.idx + " " + n2.idx);
                         // add n1 again to check if this merge enabled further merges
                         validStack.Push(n1);
                         break;
@@ -460,6 +442,10 @@ public class OctTreeMerged : MonoBehaviour
                     transitions_add.Add((n1.idx, neigh));
             }
         }
+
+        // increase the size of the parents of n1 for node insertion
+        UpdateParentScale(n1);
+
         // remove n2 from its parent's children list
         if (n2.parent != null)
         {
@@ -472,6 +458,20 @@ public class OctTreeMerged : MonoBehaviour
             data.validNodes.Remove(n2.idx);
         else
             data.invalidNodes.Remove(n2.idx);
+    }
+
+    void UpdateParentScale(CustomNodeScriptable cn)
+    {
+        // enlarge the parents of a node that we just merged to help Pos2Idx
+        while (cn.parent != null)
+        {
+            CustomNodeScriptable parent = data.FindNode(cn.parent);
+            Vector3 min = Vector3.Min(parent.position - parent.scale / 2, cn.position - cn.scale / 2);
+            Vector3 max = Vector3.Max(parent.position + parent.scale / 2, cn.position + cn.scale / 2);
+            parent.position = (max + min) / 2;
+            parent.scale = max - min;
+            cn = parent;
+        }
     }
 
     public void BuildGraph()
@@ -538,8 +538,6 @@ public class OctTreeMerged : MonoBehaviour
                     (Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2) + Mathf.Min(n1.position.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2)) / 2,
                     (Mathf.Max(n1.position.y - n1.scale.y / 2, n2.position.y - n2.scale.y / 2) + Mathf.Min(n1.position.y + n1.scale.y / 2, n2.position.y + n2.scale.y / 2)) / 2,
                     (Mathf.Max(n1.position.z - n1.scale.z / 2, n2.position.z - n2.scale.z / 2) + Mathf.Min(n1.position.z + n1.scale.z / 2, n2.position.z + n2.scale.z / 2)) / 2);
-            //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //g.transform.position = transition.position;
             // we use scale to store the size of the connecting surface
             transition.scale = new Vector3(
                 Mathf.Min(n1.position.x + n1.scale.x / 2, n2.position.x + n2.scale.x / 2) - Mathf.Max(n1.position.x - n1.scale.x / 2, n2.position.x - n2.scale.x / 2),

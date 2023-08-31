@@ -342,9 +342,9 @@ public class NodeDataMerged : ScriptableObject
             var cn_copy = cn.Clone();
             if (cn_copy.name != "invalid")
             {
-                GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                g.transform.position = cn_copy.position;
-                g.transform.localScale = cn_copy.scale;
+                //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                //g.transform.position = cn_copy.position;
+                //g.transform.localScale = cn_copy.scale;
                 invalidNodes[cn_copy.idx] = cn_copy;
                 cn_copy.LoadNeighbors();
             }

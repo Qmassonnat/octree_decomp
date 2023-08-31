@@ -89,7 +89,6 @@ public class AstarMerged : MonoBehaviour
     public string Pos2Idx(Vector3 v)
     {
         // iterate breadth first over the nodes containing v, stop when a valid cell is found
-        OctTreeMerged octTreeGenerator = gameObject.GetComponent<OctTreeMerged>();
         List<CustomNodeScriptable> candidate_nodes = new List<CustomNodeScriptable> { data.FindNode("0")};
         while (candidate_nodes.Count != 0 )
         {
@@ -101,15 +100,14 @@ public class AstarMerged : MonoBehaviour
             foreach (string child_idx in cn.children)
             {
                 CustomNodeScriptable child = data.FindNode(child_idx);
-                if ((child.position.x - child.scale.x <= v.x && v.x <= child.position.x + child.scale.x) &&
-                    (child.position.y - child.scale.y <= v.y && v.y <= child.position.y + child.scale.y) &&
-                    (child.position.z - child.scale.z <= v.z && v.z <= child.position.z + child.scale.z))
+                if ((child.position.x - child.scale.x/2 <= v.x && v.x <= child.position.x + child.scale.x/2) &&
+                    (child.position.y - child.scale.y/2 <= v.y && v.y <= child.position.y + child.scale.y/2) &&
+                    (child.position.z - child.scale.z/2 <= v.z && v.z <= child.position.z + child.scale.z/2))
                 {
                     candidate_nodes.Add(child);
                 }
             }
         }
-        Debug.Log("Error in Pos2Idx");
         return null;
     }
 
@@ -170,10 +168,8 @@ public class AstarMerged : MonoBehaviour
         float path_length = 0;
         if (start_idx != target_idx)
         {
-            //double t1 = Time.realtimeSinceStartupAsDouble;
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
-            //Debug.Log("reset " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             double t1 = Time.realtimeSinceStartup;
             AstarSearch();
             Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
@@ -386,10 +382,7 @@ public class AstarMerged : MonoBehaviour
         }
         Vector3 first = path.First();
         new_path.Add(first);
-        old_dist += Vector3.Distance(first, path[1]);
-        new_dist += Vector3.Distance(first, last);
         new_path.Reverse();
-        //Debug.Log("Before pruning path " + path.Count + " nodes, length " + old_dist + " after pruning " + new_path.Count + " nodes, length " + new_dist);
         return new_path;
     }
 
@@ -398,7 +391,7 @@ public class AstarMerged : MonoBehaviour
         // returns true iff the straight line between x and y does not intersect an invalid octtree cell
         //bool visible = !Physics.Raycast(x, y - x, Vector3.Distance(y, x));
         bool visible = true;
-        float step = gameObject.GetComponent<OctTreeMerged>().minSize / 2;
+        float step = gameObject.GetComponent<OctTreeMerged>().minSize / 5;
         float n = Mathf.Floor(Vector3.Distance(x, y) / step);
         OctTreeMerged octTreeGenerator = gameObject.GetComponent<OctTreeMerged>();
         for (int j = 0; j < n; j++)

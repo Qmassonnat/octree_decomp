@@ -132,7 +132,7 @@ public class AstarFast : MonoBehaviour
             }
         }
         if (n == 0)
-            Debug.LogError("Error in InsertTempNode");
+            Debug.LogError("Error in Pos2Idx for " + v);
         return (null, null);
     }
 
@@ -196,7 +196,6 @@ public class AstarFast : MonoBehaviour
             //double t1 = Time.realtimeSinceStartupAsDouble;
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
-            //Debug.Log("reset " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             double t1 = Time.realtimeSinceStartup;
             AstarSearch();
             Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
@@ -409,10 +408,7 @@ public class AstarFast : MonoBehaviour
         }
         Vector3 first = path.First();
         new_path.Add(first);
-        old_dist += Vector3.Distance(first, path[1]);
-        new_dist += Vector3.Distance(first, last);
         new_path.Reverse();
-        //Debug.Log("Before pruning path " + path.Count + " nodes, length " + old_dist + " after pruning " + new_path.Count + " nodes, length " + new_dist);
         return new_path;
     }
 
