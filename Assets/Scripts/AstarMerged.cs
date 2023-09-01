@@ -155,10 +155,12 @@ public class AstarMerged : MonoBehaviour
         nb_visited = 0;
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double t0 = Time.realtimeSinceStartupAsDouble;
+        startNode = ScriptableObject.CreateInstance<CustomNodeScriptable>();
         startNode.name = "start";
         startNode.idx = "start";
         startNode.position = start;
         InsertTempNode(startNode);
+        targetNode = ScriptableObject.CreateInstance<CustomNodeScriptable>();
         targetNode.name = "target";
         targetNode.idx = "target";
         targetNode.position = target;

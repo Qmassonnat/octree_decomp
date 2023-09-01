@@ -119,8 +119,7 @@ public class NodeDataMerged : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the parent entry and add the correct children entries
-                List<string> n_list = neigh.valid_neighbors[GetOppositeDirection(entry.Key)];
-                n_list.Remove(cn.idx);
+                neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
                 foreach (var child in children) {
                     if (IsNeighbor(neigh, child) != null)
                         neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Add(child.idx);
@@ -136,8 +135,7 @@ public class NodeDataMerged : ScriptableObject
                 // get the CustomNode associated with that neighbor
                 CustomNodeScriptable neigh = FindNode(neighbor_);
                 // remove the parent entry and add the correct children entries
-                List<string> n_list = neigh.invalid_neighbors[GetOppositeDirection(entry.Key)];
-                n_list.Remove(cn.idx);
+                neigh.valid_neighbors[GetOppositeDirection(entry.Key)].Remove(cn.idx);
                 foreach (var child in children)
                 {
                     if (IsNeighbor(neigh, child) != null)
@@ -223,60 +221,6 @@ public class NodeDataMerged : ScriptableObject
             res = "forward";
         return res;
     }
-
-    public List<string> GetNeighborsSplit(string idx, string direction)
-    {
-        List<string> res = new List<string> { };
-        if (direction.Equals("up"))
-            res = new List<string> { idx + "4", idx + "5", idx + "6", idx + "7" };
-        if (direction.Equals("down"))
-            res = new List<string> { idx + "0", idx + "1", idx + "2", idx + "3" };
-        if (direction.Equals("left"))
-            res = new List<string> { idx + "0", idx + "2", idx + "4", idx + "6" };
-        if (direction.Equals("right"))
-            res = new List<string> { idx + "1", idx + "3", idx + "5", idx + "7" };
-        if (direction.Equals("forward"))
-            res = new List<string> { idx + "2", idx + "3", idx + "6", idx + "7" };
-        if (direction.Equals("backward"))
-            res = new List<string> { idx + "0", idx + "1", idx + "4", idx + "5" };
-        return res;
-    }
-
-    public int Direction2Int(string direction)
-    {
-
-        if (direction.Equals("up"))
-            return 4;
-        if (direction.Equals("down"))
-            return -4;
-        if (direction.Equals("left"))
-            return -1;
-        if (direction.Equals("right"))
-            return 1;
-        if (direction.Equals("forward"))
-            return 2;
-        if (direction.Equals("backward"))
-            return -2;
-        return 0;
-    }
-
-    public bool TestDirection(string direction, int i)
-    {
-        if (direction.Equals("up"))
-            return i < 4;
-        if (direction.Equals("down"))
-            return i >= 4;
-        if (direction.Equals("left"))
-            return i % 2 == 1;
-        if (direction.Equals("right"))
-            return i % 2 == 0;
-        if (direction.Equals("forward"))
-            return i % 4 < 2;
-        if (direction.Equals("backward"))
-            return i % 4 >= 2;
-        return false;
-    }
-
 
     public void SaveData(string filename)
     {
@@ -368,6 +312,5 @@ public class NodeDataMerged : ScriptableObject
             }
         }
     }
-
 
 }
