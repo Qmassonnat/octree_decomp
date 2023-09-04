@@ -9,12 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6896030649491526210}
-  - component: {fileID: 6896030649491526237}
+  - component: {fileID: 6896030649491526208}
   - component: {fileID: 6896030649491526211}
   - component: {fileID: 6896030649491526209}
-  - component: {fileID: 6896030649491526208}
+  - component: {fileID: 6896030649491526237}
   - component: {fileID: 2639934361892189255}
   - component: {fileID: 2972381337115823456}
+  - component: {fileID: 6806275381421508971}
+  - component: {fileID: 8298304885888053351}
   - component: {fileID: 5114098842706080968}
   - component: {fileID: 5905634589725069190}
   m_Layer: 0
@@ -39,23 +41,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6896030649491526237
+--- !u!114 &6896030649491526208
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6896030649491526236}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3985bc94582ab4dbdd922f3cd21ba3, type: 3}
+  m_Script: {fileID: 11500000, guid: 43cec0cad1b2e714897f9d7fe8af7d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minSize: 1.25
+  voxelValid: {fileID: 8898184809814771781, guid: d9628f31d09cbbf408c5aea89cd0dd52, type: 3}
+  voxelInvalid: {fileID: 288399818150345534, guid: 8f98b48d27ab43d4baaa5ed8272a3fc2, type: 3}
+  bound: 10
+  zBound: 20
+  read_from_file: 0
   start: {x: 0, y: 0, z: 0}
   target: {x: 0, y: 0, z: 0}
-  read_from_file: 1
-  draw: 0
-  prune: 0
 --- !u!114 &6896030649491526211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,26 +95,23 @@ MonoBehaviour:
   bound: 10
   zBound: 20
   elongated_criteria: 99
---- !u!114 &6896030649491526208
+--- !u!114 &6896030649491526237
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6896030649491526236}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43cec0cad1b2e714897f9d7fe8af7d48, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e3985bc94582ab4dbdd922f3cd21ba3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minSize: 1.25
-  voxelValid: {fileID: 8898184809814771781, guid: d9628f31d09cbbf408c5aea89cd0dd52, type: 3}
-  voxelInvalid: {fileID: 288399818150345534, guid: 8f98b48d27ab43d4baaa5ed8272a3fc2, type: 3}
-  bound: 10
-  zBound: 20
-  read_from_file: 0
   start: {x: 0, y: 0, z: 0}
   target: {x: 0, y: 0, z: 0}
+  read_from_file: 1
+  draw: 0
+  prune: 0
 --- !u!114 &2639934361892189255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +125,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSize: 1.25
-  node: {fileID: 576164036502783829, guid: 18ac2e5c2350d044494fe1e2336a0912, type: 3}
   bound: 10
   zBound: 20
   elongated_criteria: 99
@@ -147,7 +148,50 @@ MonoBehaviour:
   draw: 0
   prune: 0
   funnel: 1
+  move: 0
+  collDetectRange: 5
   data: {fileID: 0}
+  done: 0
+--- !u!114 &6806275381421508971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6896030649491526236}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cf6d85fbf382a14893e999a187b66a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minSize: 1.25
+  bound: 10
+  zBound: 20
+  elongated_criteria: 99
+  load: 0
+  data: {fileID: 0}
+--- !u!114 &8298304885888053351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6896030649491526236}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768fdefe93e4f9148b4ab838518a9194, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  start: {x: 0, y: 0, z: 0}
+  target: {x: 0, y: 0, z: 0}
+  read_from_file: 0
+  draw: 1
+  prune: 1
+  funnel: 1
+  move: 0
+  collDetectRange: 5
+  data: {fileID: 0}
+  done: 0
 --- !u!114 &5114098842706080968
 MonoBehaviour:
   m_ObjectHideFlags: 0

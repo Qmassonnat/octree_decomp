@@ -94,7 +94,7 @@ public class DynamicObstacles : MonoBehaviour
             if (t == 0)
             {
                 // if the obstacle has reached the target position make it orbit around it for 5-10 second
-                if (Vector3.Distance(pos, target) < 0.1f)
+                if (Vector3.Distance(pos, target) < 0.5f)
                 {
                     erratic_mvt[i] = (target, Time.realtimeSinceStartup + Random.Range(3f, 5f));
                 }
@@ -106,7 +106,7 @@ public class DynamicObstacles : MonoBehaviour
             }
             else if (Time.realtimeSinceStartup < t)
             {
-                if (Vector3.Distance(pos, target) < 0.1f)
+                if (Vector3.Distance(pos, target) < 0.5f)
                 {
                     obs_vel[i] = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)).normalized;
                 }
