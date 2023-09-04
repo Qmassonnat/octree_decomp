@@ -650,7 +650,7 @@ public class OctTreeFast : MonoBehaviour
                         // remove all transitions with the child
                         foreach (KeyValuePair<string, List<string>> entry in child.valid_neighbors)
                         {
-                            // add a transition between the now valid node and all of its valid neighbors
+                            // remove the transitions with child nodes
                             foreach (string neigh in entry.Value)
                                 transitions_remove.Add((child.idx, neigh));
                         }

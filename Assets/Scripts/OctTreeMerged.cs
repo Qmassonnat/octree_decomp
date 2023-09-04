@@ -18,7 +18,6 @@ public class OctTreeMerged : MonoBehaviour
     [HideInInspector] public NodeDataMerged data;
     private List<CustomNodeScriptable> to_split = new List<CustomNodeScriptable>();
     private List<CustomNodeScriptable> to_repair = new List<CustomNodeScriptable>();
-    private List<CustomNodeScriptable> to_merge = new List<CustomNodeScriptable>();
     private List<(string, string)> transitions_add = new List<(string, string)>();
     private List<(string, string)> transitions_remove = new List<(string, string)>();
     private string task;
@@ -132,7 +131,6 @@ public class OctTreeMerged : MonoBehaviour
                 // add the transitions between the new node and its neighbors
                 foreach (string neigh in entry.Value)
                     transitions_add.Add((new_node.idx, neigh));
-            to_merge.Add(new_node);
         }
     }
 
@@ -163,6 +161,9 @@ public class OctTreeMerged : MonoBehaviour
                 child.name = global_id.ToString();
                 child.tag = "Valid";
                 child.parent = node_.idx;
+                // if we are updating the octtree keep track of the parent in the original merged octtree
+                if (task == "finished")
+                    child.merge_parent = node_.idx;
                 if (!node_.children.Contains(child.idx))
                     node_.children.Add(child.idx);
                 child.valid_neighbors = new Dictionary<string, List<string>> {
@@ -286,7 +287,7 @@ public class OctTreeMerged : MonoBehaviour
     public void PruneOctTree()
     {
       
-        Stack validStack = new Stack(to_merge);
+        Stack validStack = new Stack(data.validNodes.Values);
         while (validStack.Count > 0)
         {
             CustomNodeScriptable n1 = (CustomNodeScriptable)validStack.Pop();
@@ -602,7 +603,6 @@ public class OctTreeMerged : MonoBehaviour
     {
         to_split = new List<CustomNodeScriptable>();
         to_repair = new List<CustomNodeScriptable>();
-        to_merge = new List<CustomNodeScriptable>();
         transitions_add = new List<(string, string)>();
         transitions_remove = new List<(string, string)>();
         t0 = Time.realtimeSinceStartupAsDouble;
@@ -650,7 +650,7 @@ public class OctTreeMerged : MonoBehaviour
             }
         }
         // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        path_blocked = to_repair.Count > 0 || to_split.Count > 0;
+        //path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {
             while (to_split.Count > 0)
@@ -659,12 +659,43 @@ public class OctTreeMerged : MonoBehaviour
                 to_split.Remove(to_split.First());
                 SplitNode(node);
             }
-            foreach (CustomNodeScriptable ci in to_repair)
+            while (to_repair.Count != 0)
             {
+                CustomNodeScriptable ci = to_repair.First();
+                to_repair.Remove(to_repair.First());
                 RepairNode(ci);
+                // try repairing the node
+                while (IsRestorable(ci))
+                {
+                    CustomNodeScriptable parent = data.FindNode(ci.merge_parent);
+                    Debug.Log("restoring " + parent.idx);
+                    data.UpdateNeighborsOnMerge(parent);
+                    foreach (string child_idx in parent.children)
+                    {
+                        CustomNodeScriptable child = data.FindNode(child_idx);
+                        // remove all transitions with the child
+                        foreach (KeyValuePair<string, List<string>> entry in child.valid_neighbors)
+                        {
+                            // remove the transitions with child nodes
+                            foreach (string neigh in entry.Value)
+                                transitions_remove.Add((child.idx, neigh));
+                        }
+                        data.validNodes.Remove(child.idx);
+                        DestroyImmediate(child);
+                    }
+                    parent.children = new List<string>();
+                    ChangeType(parent, "Node", "Valid");
+                    foreach (KeyValuePair<string, List<string>> entry in parent.valid_neighbors)
+                    {
+                        // add a transition between the now valid node and all of its valid neighbors
+                        foreach (string neigh in entry.Value)
+                            transitions_add.Add((parent.idx, neigh));
+                    }
+                    ci = parent;
+                }
             }
-            PruneOctTree();
-            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms" + data.validNodes.Count);
+
+            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph with a local update method
             UpdateGraph();
@@ -679,6 +710,8 @@ public class OctTreeMerged : MonoBehaviour
                 {
                     Debug.Log("start or target inside of obstacle");
                 }
+                Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+                t0 = Time.realtimeSinceStartup;
                 GameObject dr = GameObject.Find("DrawPath");
                 foreach (var cn in data.validNodes.Values)
                 {
@@ -710,10 +743,23 @@ public class OctTreeMerged : MonoBehaviour
                 //    }
                 }
             }
-            Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            Debug.Log("Visualisation updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
     }
 
+    public bool IsRestorable (CustomNodeScriptable cn)
+    {
+        if (cn.merge_parent == null)
+            return false;
+        CustomNodeScriptable parent = data.FindNode(cn.merge_parent);
+        foreach (string child_idx in parent.children)
+        {
+            CustomNodeScriptable child = data.FindNode(child_idx);
+            if (child.tag != "Valid")
+                return false;
+        }
+        return true;
+    }
     
     public void RepairNode(CustomNodeScriptable node)
     {
@@ -729,7 +775,7 @@ public class OctTreeMerged : MonoBehaviour
 
         // start a greedy merge from the repaired node
         // when we merge 2 nodes, remove their transitions and add new ones for the merged cell
-        to_merge.Add(node);
+        //to_merge.Add(node);
     }
 
     public void ChangeType(CustomNodeScriptable cn, string old_type, string new_type)

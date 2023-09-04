@@ -204,6 +204,65 @@ public class NodeDataMerged : ScriptableObject
         }
     }
 
+    public void UpdateNeighborsOnMerge(CustomNodeScriptable parent)
+    {
+        // compute the neighbors of the parent from the children's neighbors
+        // discard the old neighbor information of the parent
+        foreach (string direction in directions)
+        {
+            parent.valid_neighbors[direction] = new List<string>();
+            parent.invalid_neighbors[direction] = new List<string>();
+        }
+        foreach (string child_idx in parent.children)
+        {
+            CustomNodeScriptable child = FindNode(child_idx);
+            foreach (var direction in directions)
+            {
+                // only add the non-children neighbors
+                foreach (var neigh_idx in child.valid_neighbors[direction])
+                {
+                    CustomNodeScriptable neigh = FindNode(neigh_idx);
+                    if (child.parent == neigh.parent)
+                        continue;
+                    // make sure the neighbor has not already been added
+                    if (!parent.valid_neighbors[direction].Contains(neigh_idx))
+                        parent.valid_neighbors[direction].Add(neigh_idx);
+                    // remove the child from the adjacent node's neighbor list
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(child.idx);
+                }
+                foreach (var neigh_idx in child.invalid_neighbors[direction])
+                {
+                    if (!parent.invalid_neighbors[direction].Contains(neigh_idx))
+                        parent.invalid_neighbors[direction].Add(neigh_idx);
+                    // remove the child from the adjacent node's neighbor list
+                    CustomNodeScriptable neigh = FindNode(neigh_idx);
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Remove(child.idx);
+                }
+            }
+        }
+        // update the adjacent's neighbors to reference the parent and not the children
+        foreach (string direction in directions)
+        {
+            foreach (var neigh_idx in parent.valid_neighbors[direction])
+            {
+                // add the parent to the adjacent node's neighbor list
+                CustomNodeScriptable neigh = FindNode(neigh_idx);
+                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
+            }
+        }
+        foreach (string direction in directions)
+        {
+            foreach (var neigh_idx in parent.invalid_neighbors[direction])
+            {
+                // add the parent to the adjacent node's neighbor list
+                CustomNodeScriptable neigh = FindNode(neigh_idx);
+                if (!neigh.valid_neighbors[GetOppositeDirection(direction)].Contains(parent.idx))
+                    neigh.valid_neighbors[GetOppositeDirection(direction)].Add(parent.idx);
+            }
+        }
+    }
+
     public string GetOppositeDirection(string direction)
     {
         string res = "";

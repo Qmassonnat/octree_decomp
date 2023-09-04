@@ -51,7 +51,6 @@ public class DynamicObstacles : MonoBehaviour
             zBound = 20;
             Debug.LogError("Pathfinding component inactive");
         }
-        AddAsteroids(obs_number);
     }
 
     public void AddAsteroids(int n)
@@ -127,15 +126,16 @@ public class DynamicObstacles : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MoveErratic();
-        //MoveAsteroids();
-        /*if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarFast>().done)
+        if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarFast>().done || gameObject.GetComponent<AstarMerged>().done)
         {
             if (obs_list.Count == 0)
-                AddObstaclesInOctTree();
+                AddAsteroids(obs_number);
+                //AddObstaclesInOctTree();
             else
-                MoveInOctTree();
-        }*/
+                //MoveInOctTree();
+                MoveErratic();
+                //MoveAsteroids();
+        }
     }
 
     public void AddObstaclesInOctTree()
