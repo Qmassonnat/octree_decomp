@@ -24,7 +24,7 @@ public class OctTreeMerged : MonoBehaviour
     private double t0;
     private string[] directions;
     private bool tested = false;
-    private int global_id = 1;
+    [HideInInspector] public int global_id = 1;
 
     // Start is called before the first frame update
     void Start()
@@ -35,7 +35,7 @@ public class OctTreeMerged : MonoBehaviour
         if (load && AssetDatabase.IsValidFolder(path))
         {
             t0 = Time.realtimeSinceStartupAsDouble;
-            data.LoadData(path);
+            global_id = data.LoadData(path);
             Debug.Log("Loading data from file " + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             task = "finished";
             gameObject.tag = "Finished";
@@ -663,12 +663,12 @@ public class OctTreeMerged : MonoBehaviour
             {
                 CustomNodeScriptable ci = to_repair.First();
                 to_repair.Remove(to_repair.First());
+
                 RepairNode(ci);
                 // try repairing the node
                 while (IsRestorable(ci))
                 {
                     CustomNodeScriptable parent = data.FindNode(ci.merge_parent);
-                    Debug.Log("restoring " + parent.idx);
                     data.UpdateNeighborsOnMerge(parent);
                     foreach (string child_idx in parent.children)
                     {

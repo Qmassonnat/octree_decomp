@@ -20,7 +20,7 @@ public class CustomNodeScriptable : ScriptableObject
     [HideInInspector] public List<string> invalid_neigh_back = new List<string>();
     [HideInInspector] public List<string> invalid_neigh_forth = new List<string>();
     public string parent;
-    public string merge_parent = null;
+    public string merge_parent ;
     public List<string> children = new List<string>();
     public float dist_to_goal;
     public float cost_to_start;

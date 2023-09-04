@@ -129,11 +129,11 @@ public class DynamicObstacles : MonoBehaviour
         if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarFast>().done || gameObject.GetComponent<AstarMerged>().done)
         {
             if (obs_list.Count == 0)
-                AddAsteroids(obs_number);
-                //AddObstaclesInOctTree();
+                //AddAsteroids(obs_number);
+                AddObstaclesInOctTree();
             else
-                //MoveInOctTree();
-                MoveErratic();
+                MoveInOctTree();
+                //MoveErratic();
                 //MoveAsteroids();
         }
     }
@@ -142,13 +142,28 @@ public class DynamicObstacles : MonoBehaviour
     {
         // add  obs_number obstacles at the center of random valid octtree cells
         OctTreeFast oc = GetComponent<OctTreeFast>();
-        int n = oc.data.nodes.Count;
-        for (int i = 0; i<obs_number; i++)
+        OctTreeMerged ocm = GetComponent<OctTreeMerged>();
+
+        int n;
+        if (gameObject.GetComponent<OctTreeFast>().isActiveAndEnabled)
+            n = oc.data.nodes.Count;
+        else
+            n = ocm.data.nodes.Count;
+        for (int i = 0; i < obs_number; i++)
         {
             int j = Random.Range(0, n);
-            var cn = oc.data.nodes.ElementAt(j).Value;
+            CustomNodeScriptable cn;
+            if (gameObject.GetComponent<OctTreeFast>().isActiveAndEnabled)
+                cn = oc.data.nodes.ElementAt(j).Value;
+            else
+                cn = ocm.data.nodes.ElementAt(j).Value;
             if (cn.idx == "start" || cn.idx == "target")
-                cn = oc.data.nodes.ElementAt((j+2)%n).Value;
+            {
+                if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
+                    cn = oc.data.nodes.ElementAt((j + 2) % n).Value;
+                else
+                    cn = ocm.data.nodes.ElementAt((j + 2) % n).Value;
+            }
             GameObject obs = GameObject.Instantiate(obstacle);
             obs.transform.localScale = obs_size * Vector3.one;
             obs.transform.position = cn.position;
@@ -161,7 +176,12 @@ public class DynamicObstacles : MonoBehaviour
     public void MoveInOctTree()
     {
         AstarFast pf = GetComponent<AstarFast>();
-        int n = pf.data.validNodes.Count;
+        AstarMerged pfm = GetComponent<AstarMerged>();
+        int n;
+        if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
+            n = pf.data.validNodes.Count;
+        else
+            n = pfm.data.validNodes.Count;
         for (int i = 0; i < obs_list.Count; i++)
         {
             GameObject obs = obs_list[i];
@@ -170,11 +190,21 @@ public class DynamicObstacles : MonoBehaviour
             {
                 // when it has reached its target, randomly select another cell and repeat
                 int j = Random.Range(0, n);
-                var new_target = pf.data.nodes.ElementAt(j).Value;
+                CustomNodeScriptable new_target;
+                if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
+                    new_target = pf.data.nodes.ElementAt(j).Value;
+                else
+                    new_target = pfm.data.nodes.ElementAt(j).Value;
                 if (new_target.idx == "start" || new_target.idx == "target")
-                    new_target = pf.data.nodes.ElementAt((j + 2) % n).Value;
+                {
+                    if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
+                        new_target = pf.data.nodes.ElementAt((j + 2) % n).Value;
+                    else
+                        new_target = pfm.data.nodes.ElementAt((j + 2) % n).Value;
+                }
                 // if the octtree was updated and the node no longer exists, restart from another point
-                if (!pf.data.nodes.ContainsKey(obs_target[i].idx))
+                if ((gameObject.GetComponent<AstarFast>().isActiveAndEnabled && !pf.data.nodes.ContainsKey(obs_target[i].idx)) ||
+                    (gameObject.GetComponent<AstarMerged>().isActiveAndEnabled && !pfm.data.nodes.ContainsKey(obs_target[i].idx)))
                 {
                     intermediate_target[i] = new List<Vector3> { new_target.position };
                 }
@@ -211,6 +241,7 @@ public class DynamicObstacles : MonoBehaviour
                 }
             }
         }
+        
 
     }
 }

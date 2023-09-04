@@ -327,9 +327,15 @@ public class NodeDataMerged : ScriptableObject
             AssetDatabase.AddObjectToAsset(cn.Clone(), cell);
         }
         AssetDatabase.ImportAsset(path + "/cells.asset");
+
+        // store the global id for merged octtree
+        using (StreamWriter writetext = new StreamWriter(path + "/id.txt"))
+        {
+            writetext.WriteLine(GameObject.Find("PathFinding").GetComponent<OctTreeMerged>().global_id);
+        }
     }
 
-    public void LoadData(string path)
+    public int LoadData(string path)
     {
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/valid.asset"))
         {
@@ -370,6 +376,12 @@ public class NodeDataMerged : ScriptableObject
                 cn_copy.LoadNeighbors();
             }
         }
+        using (StreamReader readtext = new StreamReader(path + "/id.txt"))
+        {
+            int global_id = int.Parse(readtext.ReadLine());
+            return global_id;
+        }
+
     }
 
 }
