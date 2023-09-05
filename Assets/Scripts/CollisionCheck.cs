@@ -9,8 +9,7 @@ public class CollisionCheck : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // if we test Warframe maps let the MapGenerator script handle obstacles
-        if (GameObject.Find("MapGenerator") == null)
+        if (GameObject.Find("MapGenerator") == null || GameObject.Find("MapGenerator").GetComponent<WarframeMap>().draw)
             UpdateObstacles();
     }
 
