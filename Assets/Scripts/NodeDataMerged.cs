@@ -346,7 +346,7 @@ public class NodeDataMerged : ScriptableObject
                 cn_copy.LoadNeighbors();
             }
         }
-        foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/invalid.asset"))
+        /*foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/invalid.asset"))
         {
             var cn_copy = cn.Clone();
             if (cn_copy.name != "invalid")
@@ -357,7 +357,7 @@ public class NodeDataMerged : ScriptableObject
                 invalidNodes[cn_copy.idx] = cn_copy;
                 cn_copy.LoadNeighbors();
             }
-        }
+        }*/
         foreach (CustomNodeScriptable cn in AssetDatabase.LoadAllAssetsAtPath(path + "/nodes.asset"))
         {
             var cn_copy = cn.Clone();

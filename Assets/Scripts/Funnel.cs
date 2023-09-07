@@ -16,8 +16,19 @@ public class Funnel : MonoBehaviour
         List<Vector3> positionList = new List<Vector3> { path[0].position };
         List<Color> colors = new List<Color> { Color.red, Color.yellow, Color.cyan, Color.blue, Color.gray, Color.white };
         InitializeFunnel(0, path[0].position);
+        // if the anchor is inside the starting transition, every direction is accessible so initiate it with the next transition instead
+        bool inside = false;
+        if (IsInside(anchorPoint, fov))
+        {
+            inside = true;
+            InitializeFunnel(1, path[0].position);
+        }
         for (int i=1; i<path.Count; i++)
         {
+            if (inside) { 
+                inside = false;
+                continue;
+            }
             CustomNodeScriptable cn = path[i];
             // get the coordinates of the next transition
             List<Vector3> transition = GetTransitionSurface(cn);
@@ -40,9 +51,6 @@ public class Funnel : MonoBehaviour
     public void InitializeFunnel(int idx, Vector3 anchor)
     {
         anchorPoint = anchor;
-        //GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //g.transform.position = anchorPoint;
-        //g.transform.localScale = Vector3.one * 0.5f;
         fov = GetTransitionSurface(path[idx + 1]);
         normalized_fov = new List<Vector3>(new Vector3[fov.Count]);
         // normalize the vectors in fov to be on S(0, 1)
@@ -50,6 +58,19 @@ public class Funnel : MonoBehaviour
             normalized_fov[j] = (fov[j] - anchorPoint) / Vector3.Distance(fov[j], anchorPoint);
     }
 
+    bool IsInside (Vector3 anchor, List<Vector3> transition)
+    {
+        Vector3 min = Vector3.positiveInfinity;
+        Vector3 max = Vector3.negativeInfinity;
+        foreach (Vector3 v in transition)
+        {
+            min = Vector3.Min(min, v);
+            max = Vector3.Max(max, v);
+        }
+        return ((anchor.x > min.x && anchor.x < max.x) || (anchor.x == min.x && anchor.x == max.x)) && 
+               ((anchor.y > min.y && anchor.y < max.y) || (anchor.y == min.y && anchor.y == max.y)) && 
+               ((anchor.z > min.z && anchor.z < max.z) || (anchor.z == min.z && anchor.z == max.z));
+    }
 
     // computes the intersection between fov and transition, returning false if the intersection is empty
     public bool ConvexIntersection(List<Vector3> transition)
@@ -234,7 +255,7 @@ public class Funnel : MonoBehaviour
             return false;
         else if (line_transition)
         {
-            // if the transition is a line, project normalized_trans on that line
+            // if the transition is a line, project the fov on that line
 
             fov = new List<Vector3>();
             normalized_fov = new List<Vector3>();
@@ -508,7 +529,7 @@ public class Funnel : MonoBehaviour
             bool seen = false;
             for (int j=0; j<i; j++)
             {
-                if (Vector3.Distance(li[i], li[j]) < 1e-6)
+                if (Vector3.Distance(li[i], li[j]) < 1e-4)
                     seen = true;
             }
             if (!seen)

@@ -100,6 +100,8 @@ public class AstarMerged : MonoBehaviour
             foreach (string child_idx in cn.children)
             {
                 CustomNodeScriptable child = data.FindNode(child_idx);
+                if (child == null)
+                    continue;
                 if ((child.position.x - child.scale.x/2 <= v.x && v.x <= child.position.x + child.scale.x/2) &&
                     (child.position.y - child.scale.y/2 <= v.y && v.y <= child.position.y + child.scale.y/2) &&
                     (child.position.z - child.scale.z/2 <= v.z && v.z <= child.position.z + child.scale.z/2))
@@ -174,7 +176,7 @@ public class AstarMerged : MonoBehaviour
                 node.ResetNode(target);
             double t1 = Time.realtimeSinceStartup;
             AstarSearch();
-            Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
+            //Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             CustomNodeScriptable cn = targetNode;
             while (cn.nearest_to_start != startNode)
             {
@@ -232,7 +234,7 @@ public class AstarMerged : MonoBehaviour
         }
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double dt = (Time.realtimeSinceStartupAsDouble - t0);
-        Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+        //Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         return (nb_visited, path_length, dt);
     }
 
@@ -245,7 +247,6 @@ public class AstarMerged : MonoBehaviour
         do
         {
             // prioQueue can get very long, instead of sorting everything insert the few values we added
-            // maybe try with only string in the queue and then data.FindNode?
             var node = prioQueue.First();
             prioQueue.Remove(node);
             foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
@@ -527,8 +528,8 @@ public class AstarMerged : MonoBehaviour
     {
         if (draw)
         {
-            while (drawPath.transform.childCount > 0)
-                DestroyImmediate(drawPath.transform.GetChild(0).gameObject);
+            for (int i=0; i<drawPath.transform.childCount; i++)
+                Destroy(drawPath.transform.GetChild(i).gameObject);
         }
         if (move)
         {

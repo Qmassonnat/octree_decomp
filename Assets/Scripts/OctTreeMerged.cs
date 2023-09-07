@@ -434,6 +434,7 @@ public class OctTreeMerged : MonoBehaviour
 
         // update the valid stack and destroy n2
         data.validNodes.Remove(n2.idx);
+        Destroy(n2);
     }
 
     void UpdateParentScale(CustomNodeScriptable cn)
@@ -504,9 +505,9 @@ public class OctTreeMerged : MonoBehaviour
             transition = data.nodes[idx];
             trans_idx = (n2.idx, n1.idx);
         }
-
         else
         {
+            t0 = Time.realtimeSinceStartup;
             trans_idx = (n1.idx, n2.idx);
             transition.name = n1.idx + "&" + n2.idx;
             transition.idx = n1.idx + "&" + n2.idx;
@@ -523,6 +524,7 @@ public class OctTreeMerged : MonoBehaviour
         // add the edges from and to that transition
         if (task == "finished" && !data.nodes.ContainsKey(transition.idx))
         {
+            t0 = Time.realtimeSinceStartup;
             // the transitions are with the valid neighbors of n1 and n2
             List<string> edges_to_add = new List<string>();
             foreach (KeyValuePair<string, List<string>> entry in n1.valid_neighbors)
@@ -545,6 +547,7 @@ public class OctTreeMerged : MonoBehaviour
                         edges_to_add.Add(neigh_idx + "&" + n2.idx);
                 }
             }
+            t0 = Time.realtimeSinceStartup;
             foreach (string other_idx in edges_to_add)
             {
                 CustomNodeScriptable other_tr = data.nodes[other_idx];
@@ -581,6 +584,7 @@ public class OctTreeMerged : MonoBehaviour
 
     public void UpdateGraph()
     {
+        double t0 = Time.realtimeSinceStartup;
         foreach (var (cn1_idx, cn2_idx) in transitions_remove)
         {
             RemoveTransition(cn1_idx, cn2_idx);
@@ -596,7 +600,6 @@ public class OctTreeMerged : MonoBehaviour
                 data.nodes[transition.idx] = transition;
             }
         }
-
     }
 
     public void UpdateOctTree()
@@ -650,7 +653,7 @@ public class OctTreeMerged : MonoBehaviour
             }
         }
         // if we want to update as soon as we can (not using the movement system) just use path_blocked = to_repair.Count > 0 || to_split.Count > 0
-        //path_blocked = to_repair.Count > 0 || to_split.Count > 0;
+        path_blocked = to_repair.Count > 0 || to_split.Count > 0;
         if (path_blocked)
         {
             while (to_split.Count > 0)
@@ -681,7 +684,7 @@ public class OctTreeMerged : MonoBehaviour
                                 transitions_remove.Add((child.idx, neigh));
                         }
                         data.validNodes.Remove(child.idx);
-                        DestroyImmediate(child);
+                        Destroy(child);
                     }
                     parent.children = new List<string>();
                     ChangeType(parent, "Node", "Valid");
@@ -694,9 +697,6 @@ public class OctTreeMerged : MonoBehaviour
                     ci = parent;
                 }
             }
-
-            Debug.Log("OctTree updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            t0 = Time.realtimeSinceStartupAsDouble;
             // update the graph with a local update method
             UpdateGraph();
             AstarMerged path_finder = GetComponent<AstarMerged>();
@@ -710,40 +710,41 @@ public class OctTreeMerged : MonoBehaviour
                 {
                     Debug.Log("start or target inside of obstacle");
                 }
-                Debug.Log("Graph updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
                 t0 = Time.realtimeSinceStartup;
-                GameObject dr = GameObject.Find("DrawPath");
-                foreach (var cn in data.validNodes.Values)
+                if (false && path_finder.draw)
                 {
-                    GameObject g = GameObject.Instantiate(vv);
-                    g.transform.position = cn.position;
-                    g.name = cn.idx;
-                    g.transform.localScale = cn.scale;
-                    g.transform.parent = GameObject.Find("DrawPath").transform ;
-                }
-                foreach (var cn in data.invalidNodes.Values)
-                {
-                    GameObject g = GameObject.Instantiate(vi);
-                    g.transform.position = cn.position;
-                    g.transform.localScale = cn.scale;
-                    g.name = cn.idx;
-                    g.transform.parent = GameObject.Find("DrawPath").transform;
-                }
-                foreach (var cn in data.nodes.Values)
-                {
-                    GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    g.transform.position = cn.position;
-                    g.transform.localScale = 0.1f * (0.1f*Vector3.one + cn.scale);
-                    g.name = cn.idx;
-                    g.transform.parent = GameObject.Find("DrawPath").transform;
-                //    foreach (var e in cn.edges)
-                //    {
-                //        CustomNodeScriptable c22 = data.nodes[e.Item1];
-                //        path_finder.DrawPath(new List<Vector3> { cn.position, c22.position }, Color.black);
-                //    }
+                    GameObject dr = GameObject.Find("DrawPath");
+                    foreach (var cn in data.validNodes.Values)
+                    {
+                        GameObject g = GameObject.Instantiate(vv);
+                        g.transform.position = cn.position;
+                        g.name = cn.idx;
+                        g.transform.localScale = cn.scale;
+                        g.transform.parent = GameObject.Find("DrawPath").transform ;
+                    }
+                    foreach (var cn in data.invalidNodes.Values)
+                    {
+                        GameObject g = GameObject.Instantiate(vi);
+                        g.transform.position = cn.position;
+                        g.transform.localScale = cn.scale;
+                        g.name = cn.idx;
+                        g.transform.parent = GameObject.Find("DrawPath").transform;
+                    }
+                    foreach (var cn in data.nodes.Values)
+                    {
+                        GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        g.transform.position = cn.position;
+                        g.transform.localScale = 0.1f * (0.1f*Vector3.one + cn.scale);
+                        g.name = cn.idx;
+                        g.transform.parent = GameObject.Find("DrawPath").transform;
+                    //    foreach (var e in cn.edges)
+                    //    {
+                    //        CustomNodeScriptable c22 = data.nodes[e.Item1];
+                    //        path_finder.DrawPath(new List<Vector3> { cn.position, c22.position }, Color.black);
+                    //    }
+                    }
                 }
             }
-            Debug.Log("Visualisation updated in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
     }
 

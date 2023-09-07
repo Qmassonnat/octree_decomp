@@ -7,6 +7,7 @@ public class WarframeMap : MonoBehaviour
     public GameObject obstacle;
     public string map_name;
     public bool draw;
+    public int i = 10;
     // TODO compute that offset automatically
     public Vector3 offset;
     Vector3 map_size;
@@ -56,7 +57,6 @@ public class WarframeMap : MonoBehaviour
         List<double> time = new List<double>();
         StreamReader sr = new StreamReader(test_path);
         string s = sr.ReadLine();
-        int i = 10;
         while (i>0 && s != null)
         {
             i--;
@@ -66,13 +66,20 @@ public class WarframeMap : MonoBehaviour
             int searched;
             float l;
             double dt;
-            if (pf.isActiveAndEnabled)  
-                (searched, l, dt) = pf.A_star_path(start, target);
-            else
-                (searched, l, dt) = pfm.A_star_path(start, target);
-            nodes_searched.Add(searched);
-            length.Add(l);
-            time.Add(dt);
+            try
+            {
+                if (pf.isActiveAndEnabled)  
+                    (searched, l, dt) = pf.A_star_path(start, target);
+                else
+                    (searched, l, dt) = pfm.A_star_path(start, target);
+                nodes_searched.Add(searched);
+                length.Add(l);
+                time.Add(dt);
+            }
+            catch
+            {
+                Debug.Log("Test failed for " + start + " -> " + target);
+            }
             s = sr.ReadLine();
         }
         // remove the first 5 entries as Unity is slow at startup
