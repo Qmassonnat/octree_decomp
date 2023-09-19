@@ -1,6 +1,8 @@
 using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
 
 public class WarframeMap : MonoBehaviour
 {
@@ -8,8 +10,7 @@ public class WarframeMap : MonoBehaviour
     public string map_name;
     public bool draw;
     public int i = 10;
-    // TODO compute that offset automatically
-    public Vector3 offset;
+    private Vector3 offset;
     Vector3 map_size;
     GameObject Obstacles;
     // Start is called before the first frame update
@@ -17,14 +18,31 @@ public class WarframeMap : MonoBehaviour
     {
         Obstacles = new GameObject();
         Obstacles.name = "Obstacles";
-        string map_path = Application.dataPath + "/Warframe/" + map_name + ".txt";
+        string map_path = Application.dataPath + "/Warframe/" + map_name + ".3dmap";
         CollisionCheck cc = null;
         if (!draw)
             cc = GameObject.Find("PathFinding").GetComponent<CollisionCheck>();
         StreamReader sr = new StreamReader(map_path);
+        OctTreeMerged oc = GameObject.Find("PathFinding").GetComponent<OctTreeMerged>();
         string s = sr.ReadLine();
         string[] l = s.Split(" ");
         map_size = new Vector3(float.Parse(l[1]), float.Parse(l[2]), float.Parse(l[3]));
+        float max_size = Mathf.Max(map_size.x, Mathf.Max(map_size.y, map_size.z));
+        if (max_size > 512) {
+            offset = new Vector3(512, 0.5f, 512);
+            oc.bound = 512;
+            oc.zBound = 1024;
+        }
+        else if (max_size > 256) {
+            offset = new Vector3(256, 0.5f, 256);
+            oc.bound = 256;
+            oc.zBound = 512;
+        }
+        else {
+            offset = new Vector3(128, 0.5f, 128);
+            oc.bound = 128;
+            oc.zBound = 256;
+        }
         s = sr.ReadLine();
         while (s != null)
         {
@@ -45,7 +63,7 @@ public class WarframeMap : MonoBehaviour
 
     public void TestScenario()
     {
-        string test_path = Application.dataPath + "/Warframe/" + map_name + "_paths.txt";
+        string test_path = Application.dataPath + "/Warframe/" + map_name + ".3dmap.3dscen";
         AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
         AstarMerged pfm = GameObject.Find("PathFinding").GetComponent<AstarMerged>();
         if (!Directory.Exists(Application.dataPath + "/Results/Warframe"))
@@ -56,7 +74,10 @@ public class WarframeMap : MonoBehaviour
         List<double> length = new List<double>();
         List<double> time = new List<double>();
         StreamReader sr = new StreamReader(test_path);
+        // skip the first 2 lines
         string s = sr.ReadLine();
+        s = sr.ReadLine();
+        s = sr.ReadLine();
         while (i>0 && s != null)
         {
             i--;
