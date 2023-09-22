@@ -237,11 +237,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2639934361892189255, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2639934361892189255, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: elongated_criteria
-      value: 99
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2972381337115823456, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: draw
@@ -249,21 +249,25 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2972381337115823456, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: prune
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2972381337115823456, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: funnel
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2972381337115823456, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2972381337115823456, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: read_from_file
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5114098842706080968, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6806275381421508971, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -360,6 +364,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6896030649491526237, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+      propertyPath: prune
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6896030649491526237, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
@@ -367,8 +375,37 @@ PrefabInstance:
       propertyPath: read_from_file
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8298304885888053351, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+      propertyPath: move
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8298304885888053351, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+--- !u!1 &465418241 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6896030649491526236, guid: e99d30e0eb5684e42a1ec450dd517a55, type: 3}
+  m_PrefabInstance: {fileID: 465418240}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &465418242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 465418241}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38479b49b6e6e564499c2d241a648ac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  obstacle: {fileID: 7030054427200104226, guid: 4d7829305cbe2694d8d1b7493b25b450, type: 3}
+  obs_number: 3
+  obs_size: 2.5
+  obs_speed: 10
 --- !u!1001 &689901957
 PrefabInstance:
   m_ObjectHideFlags: 0

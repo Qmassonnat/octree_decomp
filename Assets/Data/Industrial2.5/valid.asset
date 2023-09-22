@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8799050039603331575
+--- !u!114 &-7568727741124496048
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10,180 +10,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _07
+  m_Name: 143
   m_EditorClassIdentifier: 
-  idx: 07
-  neigh_up: []
-  neigh_down:
-  - 037
-  - 0366
-  - 0344
-  - 0345
-  - 0275
-  - 026
-  neigh_left: []
-  neigh_right: []
-  neigh_back:
-  - 05
-  - 04
-  neigh_forth: []
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: 0, y: 15, z: 5}
-  scale: {x: 20, y: 10, z: 10}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &-7727605719079790930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0201
-  m_EditorClassIdentifier: 
-  idx: 0201
-  neigh_up:
-  - 0342
-  - 0250
-  - 0225
-  neigh_down: []
-  neigh_left:
-  - 0224
-  neigh_right:
-  - 0305
-  neigh_back:
-  - 05
-  - 0073
-  neigh_forth:
-  - 0203
-  - 0302
-  - 0253
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: -2.5, y: 1.25, z: 1.25}
-  scale: {x: 10, y: 2.5, z: 2.5}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &-6256710102042209121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0061
-  m_EditorClassIdentifier: 
-  idx: 0061
-  neigh_up:
-  - 0056
-  neigh_down:
-  - 0016
-  - 0021
-  neigh_left:
-  - 0060
-  - 0042
-  neigh_right:
-  - 0071
-  - 0053
-  neigh_back:
-  - 0041
-  neigh_forth:
-  - 0073
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: -5, y: 6.25, z: -5}
-  scale: {x: 5, y: 2.5, z: 5}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &-5050037841699423804
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _05
-  m_EditorClassIdentifier: 
-  idx: 05
-  neigh_up: []
-  neigh_down: []
-  neigh_left:
-  - 04
-  - 0071
-  - 0073
-  - 0053
-  - 0013
-  - 0016
-  - 0056
-  - 0041
-  neigh_right: []
-  neigh_back: []
-  neigh_forth:
-  - 07
-  - 0305
-  - 0344
-  - 0345
-  - 0315
-  - 0201
-  - 0342
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: 5, y: 10, z: -5}
-  scale: {x: 10, y: 20, z: 10}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &-4685763012424466682
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0366
-  m_EditorClassIdentifier: 
-  idx: 0366
-  neigh_up:
-  - 07
-  neigh_down: []
-  neigh_left:
-  - 026
-  - 0226
-  neigh_right:
-  - 037
-  - 0336
-  neigh_back:
-  - 0275
-  - 0221
-  - 0234
-  - 0361
-  - 0342
-  - 0305
-  neigh_forth: []
+  idx: 143
+  valid_neigh_up:
+  - 8
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 23
+  - 119
+  valid_neigh_right:
+  - 32
+  - 175
+  valid_neigh_back:
+  - 181
+  - 122
+  - 182
+  - 147
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 137
+  - 125
+  - 138
+  - 126
+  - 185
+  - 165
+  - 166
+  - 162
+  invalid_neigh_forth: []
+  parent: 24
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
@@ -193,7 +53,7 @@ MonoBehaviour:
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-3975078421551824487
+--- !u!114 &-6466557102209521206
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -203,30 +63,78 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0302
+  m_Name: 175
   m_EditorClassIdentifier: 
-  idx: 0302
-  neigh_up:
-  - 0342
-  neigh_down: []
-  neigh_left:
-  - 0253
-  neigh_right:
-  - 0305
-  neigh_back:
-  - 0201
-  neigh_forth:
-  - 0221
+  idx: 175
+  valid_neigh_up:
+  - 32
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 143
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 158
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 173
+  - 169
+  invalid_neigh_forth: []
+  parent: 28
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 1.25, y: 1.25, z: 3.75}
+  position: {x: 7.5, y: 2.5, z: 8.75}
+  scale: {x: 5, y: 5, z: 2.5}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-5238294809570464501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 99
+  m_EditorClassIdentifier: 
+  idx: 99
+  valid_neigh_up:
+  - 117
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 106
+  valid_neigh_forth:
+  - 122
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right:
+  - 100
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 17
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -8.75, y: 1.25, z: 3.75}
   scale: {x: 2.5, y: 2.5, z: 2.5}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-3516001660535479886
+--- !u!114 &-5107218958746312995
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -236,34 +144,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0275
+  m_Name: 182
   m_EditorClassIdentifier: 
-  idx: 0275
-  neigh_up:
-  - 07
-  neigh_down:
-  - 0361
-  - 0342
-  - 0234
-  neigh_left:
-  - 026
-  neigh_right:
-  - 037
-  neigh_back:
-  - 0345
-  - 0344
-  neigh_forth:
-  - 0366
+  idx: 182
+  valid_neigh_up:
+  - 8
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 181
+  valid_neigh_right:
+  - 32
+  valid_neigh_back:
+  - 6
+  valid_neigh_forth:
+  - 143
+  invalid_neigh_up: []
+  invalid_neigh_down:
+  - 150
+  - 152
+  - 166
+  invalid_neigh_left:
+  - 177
+  - 179
+  - 185
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 29
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 0, y: 8.75, z: 6.25}
-  scale: {x: 10, y: 2.5, z: 2.5}
+  position: {x: 3.75, y: 7.5, z: 3.75}
+  scale: {x: 2.5, y: 5, z: 7.5}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-3052018164857815851
+--- !u!114 &-3286674118633438930
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -273,20 +191,170 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0226
+  m_Name: 117
   m_EditorClassIdentifier: 
-  idx: 0226
-  neigh_up:
-  - 026
-  neigh_down: []
-  neigh_left: []
-  neigh_right:
-  - 0366
-  neigh_back:
-  - 0224
-  - 0225
-  - 0221
-  neigh_forth: []
+  idx: 117
+  valid_neigh_up:
+  - 23
+  valid_neigh_down:
+  - 122
+  - 99
+  - 106
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back: []
+  valid_neigh_forth:
+  - 119
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right:
+  - 118
+  - 104
+  - 102
+  invalid_neigh_back:
+  - 55
+  invalid_neigh_forth: []
+  parent: 19
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -8.75, y: 3.75, z: 3.75}
+  scale: {x: 2.5, y: 2.5, z: 7.5}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-3109098986321291370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 5
+  m_EditorClassIdentifier: 
+  idx: 5
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right:
+  - 6
+  valid_neigh_back: []
+  valid_neigh_forth:
+  - 8
+  invalid_neigh_up: []
+  invalid_neigh_down:
+  - 69
+  - 70
+  - 71
+  - 72
+  - 77
+  - 78
+  - 79
+  - 80
+  - 85
+  - 86
+  - 87
+  - 88
+  - 93
+  - 94
+  - 95
+  - 96
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 0
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -5, y: 15, z: -5}
+  scale: {x: 10, y: 10, z: 10}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-3052336933566568530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 8
+  m_EditorClassIdentifier: 
+  idx: 8
+  valid_neigh_up: []
+  valid_neigh_down:
+  - 32
+  - 181
+  - 182
+  - 143
+  - 23
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 6
+  - 5
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 0
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 0, y: 15, z: 5}
+  scale: {x: 20, y: 10, z: 10}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &-1960858296565198825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 119
+  m_EditorClassIdentifier: 
+  idx: 119
+  valid_neigh_up:
+  - 23
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right:
+  - 143
+  valid_neigh_back:
+  - 117
+  - 122
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 118
+  invalid_neigh_forth: []
+  parent: 19
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
@@ -296,7 +364,7 @@ MonoBehaviour:
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-2756628429297045901
+--- !u!114 &-999180355863409047
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -306,35 +374,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0221
+  m_Name: 122
   m_EditorClassIdentifier: 
-  idx: 0221
-  neigh_up:
-  - 0225
-  - 0234
-  - 0342
-  neigh_down: []
-  neigh_left:
-  - 0224
-  neigh_right:
-  - 0305
-  neigh_back:
-  - 0203
-  - 0302
-  - 0253
-  neigh_forth:
-  - 0226
-  - 0366
+  idx: 122
+  valid_neigh_up:
+  - 117
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right:
+  - 147
+  valid_neigh_back:
+  - 99
+  valid_neigh_forth:
+  - 143
+  - 119
+  invalid_neigh_up:
+  - 126
+  - 125
+  - 118
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 108
+  - 107
+  - 100
+  invalid_neigh_forth: []
+  parent: 20
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: -2.5, y: 1.25, z: 6.25}
+  position: {x: -5, y: 1.25, z: 6.25}
   scale: {x: 10, y: 2.5, z: 2.5}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-2571412297122882864
+--- !u!114 &-206737900603427776
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -344,31 +421,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0361
+  m_Name: 147
   m_EditorClassIdentifier: 
-  idx: 0361
-  neigh_up:
-  - 0275
-  neigh_down:
-  - 0305
-  neigh_left:
-  - 0342
-  neigh_right:
-  - 037
-  neigh_back:
-  - 0345
-  neigh_forth:
-  - 0366
+  idx: 147
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 122
+  - 106
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 6
+  valid_neigh_forth:
+  - 143
+  invalid_neigh_up:
+  - 151
+  - 165
+  - 149
+  invalid_neigh_down: []
+  invalid_neigh_left:
+  - 108
+  invalid_neigh_right:
+  - 148
+  - 162
+  - 146
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 25
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 3.75, y: 6.25, z: 6.25}
-  scale: {x: 2.5, y: 2.5, z: 2.5}
+  position: {x: 1.25, y: 1.25, z: 3.75}
+  scale: {x: 2.5, y: 2.5, z: 7.5}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &-1266150031829831414
+--- !u!114 &-120514929156124408
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -378,63 +468,42 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0345
+  m_Name: 106
   m_EditorClassIdentifier: 
-  idx: 0345
-  neigh_up:
-  - 07
-  neigh_down:
-  - 0305
-  - 0315
-  neigh_left:
-  - 0344
-  - 0342
-  neigh_right: []
-  neigh_back:
-  - 05
-  neigh_forth:
-  - 0275
-  - 0361
-  - 037
+  idx: 106
+  valid_neigh_up:
+  - 117
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right:
+  - 147
+  valid_neigh_back: []
+  valid_neigh_forth:
+  - 99
+  invalid_neigh_up:
+  - 110
+  - 109
+  - 102
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 60
+  - 59
+  - 52
+  - 51
+  invalid_neigh_forth:
+  - 108
+  - 107
+  - 100
+  parent: 18
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 6.25, y: 7.5, z: 2.5}
-  scale: {x: 7.5, y: 5, z: 5}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &-416285463698081027
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0315
-  m_EditorClassIdentifier: 
-  idx: 0315
-  neigh_up:
-  - 037
-  - 0345
-  neigh_down: []
-  neigh_left:
-  - 0305
-  neigh_right: []
-  neigh_back:
-  - 05
-  neigh_forth:
-  - 0336
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: 8.75, y: 2.5, z: 3.75}
-  scale: {x: 2.5, y: 5, z: 7.5}
+  position: {x: -5, y: 1.25, z: 1.25}
+  scale: {x: 10, y: 2.5, z: 2.5}
   tag: Valid
   edge_idx: []
   edge_dist: []
@@ -451,12 +520,20 @@ MonoBehaviour:
   m_Name: valid
   m_EditorClassIdentifier: 
   idx: 
-  neigh_up: []
-  neigh_down: []
-  neigh_left: []
-  neigh_right: []
-  neigh_back: []
-  neigh_forth: []
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back: []
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
@@ -466,7 +543,7 @@ MonoBehaviour:
   tag: 
   edge_idx: []
   edge_dist: []
---- !u!114 &424574021209253880
+--- !u!114 &752590158442708167
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -476,129 +553,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0344
+  m_Name: 43
   m_EditorClassIdentifier: 
-  idx: 0344
-  neigh_up:
-  - 07
-  neigh_down:
-  - 0250
-  - 0342
-  - 0253
-  neigh_left:
-  - 026
-  neigh_right:
-  - 0345
-  neigh_back:
-  - 05
-  - 0073
-  neigh_forth:
-  - 0275
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: -1.25, y: 8.75, z: 2.5}
-  scale: {x: 7.5, y: 2.5, z: 5}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &1686361241547831339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _04
-  m_EditorClassIdentifier: 
-  idx: 04
-  neigh_up: []
-  neigh_down:
-  - 0056
-  - 0073
-  - 0041
-  neigh_left: []
-  neigh_right:
-  - 05
-  neigh_back: []
-  neigh_forth:
-  - 07
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: -5, y: 15, z: -5}
-  scale: {x: 10, y: 10, z: 10}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &2270457483034023328
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _026
-  m_EditorClassIdentifier: 
-  idx: 026
-  neigh_up:
-  - 07
-  neigh_down:
-  - 0224
-  - 0225
-  - 0226
-  neigh_left: []
-  neigh_right:
-  - 0275
-  - 0366
-  - 0250
-  - 0344
-  - 0253
-  - 0234
-  neigh_back:
-  - 0073
-  neigh_forth: []
-  dist_to_goal: 0
-  cost_to_start: 0
-  nearest_to_start: {fileID: 0}
-  visited: 0
-  position: {x: -7.5, y: 7.5, z: 5}
-  scale: {x: 5, y: 5, z: 10}
-  tag: Valid
-  edge_idx: []
-  edge_dist: []
---- !u!114 &2316193419680690504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0003
-  m_EditorClassIdentifier: 
-  idx: 0003
-  neigh_up:
-  - 0016
-  neigh_down: []
-  neigh_left:
-  - 0002
-  neigh_right:
-  - 0013
-  neigh_back:
-  - 0041
-  neigh_forth:
-  - 0021
+  idx: 43
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back: []
+  valid_neigh_forth: []
+  invalid_neigh_up:
+  - 47
+  - 40
+  invalid_neigh_down: []
+  invalid_neigh_left:
+  - 35
+  invalid_neigh_right:
+  - 44
+  invalid_neigh_back:
+  - 41
+  - 34
+  invalid_neigh_forth:
+  - 57
+  - 50
+  parent: 10
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
@@ -608,7 +587,7 @@ MonoBehaviour:
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &3688601958935174223
+--- !u!114 &1721575780309129359
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -618,29 +597,49 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0336
+  m_Name: 75
   m_EditorClassIdentifier: 
-  idx: 0336
-  neigh_up:
-  - 037
-  neigh_down: []
-  neigh_left:
-  - 0366
-  neigh_right: []
-  neigh_back:
-  - 0315
-  - 0305
-  neigh_forth: []
+  idx: 75
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back: []
+  valid_neigh_forth: []
+  invalid_neigh_up:
+  - 79
+  - 72
+  - 86
+  - 93
+  invalid_neigh_down:
+  - 47
+  - 40
+  - 54
+  - 61
+  invalid_neigh_left:
+  - 67
+  - 81
+  invalid_neigh_right:
+  - 76
+  - 90
+  invalid_neigh_back:
+  - 73
+  - 66
+  invalid_neigh_forth:
+  - 84
+  - 91
+  parent: 14
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 7.5, y: 2.5, z: 8.75}
-  scale: {x: 5, y: 5, z: 2.5}
+  position: {x: -5, y: 6.25, z: -5}
+  scale: {x: 5, y: 2.5, z: 5}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &5223247840570657517
+--- !u!114 &3459179126938041947
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -650,33 +649,62 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _037
+  m_Name: 6
   m_EditorClassIdentifier: 
-  idx: 037
-  neigh_up:
-  - 07
-  neigh_down:
-  - 0336
-  - 0315
-  - 0305
-  neigh_left:
-  - 0361
-  - 0275
-  - 0366
-  neigh_right: []
-  neigh_back:
-  - 0345
-  neigh_forth: []
+  idx: 6
+  valid_neigh_up: []
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 5
+  valid_neigh_right: []
+  valid_neigh_back: []
+  valid_neigh_forth:
+  - 8
+  - 158
+  - 181
+  - 182
+  - 147
+  - 32
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left:
+  - 42
+  - 44
+  - 46
+  - 48
+  - 58
+  - 60
+  - 62
+  - 64
+  - 74
+  - 76
+  - 78
+  - 80
+  - 90
+  - 92
+  - 94
+  - 96
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth:
+  - 146
+  - 149
+  - 150
+  - 153
+  - 157
+  - 177
+  parent: 0
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: 7.5, y: 7.5, z: 7.5}
-  scale: {x: 5, y: 5, z: 5}
+  position: {x: 5, y: 10, z: -5}
+  scale: {x: 10, y: 20, z: 10}
   tag: Valid
   edge_idx: []
   edge_dist: []
---- !u!114 &8435600154174721859
+--- !u!114 &3763223961422178718
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -686,28 +714,186 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
-  m_Name: _0224
+  m_Name: 32
   m_EditorClassIdentifier: 
-  idx: 0224
-  neigh_up:
-  - 026
-  neigh_down: []
-  neigh_left: []
-  neigh_right:
-  - 0225
-  - 0221
-  - 0201
-  - 0203
-  neigh_back:
-  - 0073
-  neigh_forth:
-  - 0226
+  idx: 32
+  valid_neigh_up:
+  - 8
+  valid_neigh_down:
+  - 175
+  - 158
+  valid_neigh_left:
+  - 182
+  - 143
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 6
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down:
+  - 173
+  - 157
+  - 159
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 4
+  children: []
   dist_to_goal: 0
   cost_to_start: 0
   nearest_to_start: {fileID: 0}
   visited: 0
-  position: {x: -8.75, y: 2.5, z: 3.75}
+  position: {x: 7.5, y: 7.5, z: 5}
+  scale: {x: 5, y: 5, z: 10}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &6538715763282135859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 158
+  m_EditorClassIdentifier: 
+  idx: 158
+  valid_neigh_up:
+  - 32
+  valid_neigh_down: []
+  valid_neigh_left: []
+  valid_neigh_right: []
+  valid_neigh_back:
+  - 6
+  valid_neigh_forth:
+  - 175
+  invalid_neigh_up: []
+  invalid_neigh_down: []
+  invalid_neigh_left:
+  - 157
+  - 153
+  - 159
+  - 155
+  - 173
+  - 169
+  invalid_neigh_right: []
+  invalid_neigh_back: []
+  invalid_neigh_forth: []
+  parent: 26
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: 8.75, y: 2.5, z: 3.75}
   scale: {x: 2.5, y: 5, z: 7.5}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &7592185442969497144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 23
+  m_EditorClassIdentifier: 
+  idx: 23
+  valid_neigh_up:
+  - 8
+  valid_neigh_down:
+  - 117
+  - 119
+  valid_neigh_left: []
+  valid_neigh_right:
+  - 143
+  - 181
+  valid_neigh_back: []
+  valid_neigh_forth: []
+  invalid_neigh_up: []
+  invalid_neigh_down:
+  - 118
+  - 102
+  - 104
+  invalid_neigh_left: []
+  invalid_neigh_right:
+  - 137
+  - 129
+  - 131
+  invalid_neigh_back:
+  - 83
+  - 84
+  - 87
+  - 88
+  invalid_neigh_forth: []
+  parent: 3
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -7.5, y: 7.5, z: 5}
+  scale: {x: 5, y: 5, z: 10}
+  tag: Valid
+  edge_idx: []
+  edge_dist: []
+--- !u!114 &9134679779009735082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92133900f2ef23741af92383973fb496, type: 3}
+  m_Name: 181
+  m_EditorClassIdentifier: 
+  idx: 181
+  valid_neigh_up:
+  - 8
+  valid_neigh_down: []
+  valid_neigh_left:
+  - 23
+  valid_neigh_right:
+  - 182
+  valid_neigh_back:
+  - 6
+  valid_neigh_forth:
+  - 143
+  invalid_neigh_up: []
+  invalid_neigh_down:
+  - 177
+  - 130
+  - 129
+  - 179
+  - 132
+  - 131
+  - 185
+  - 138
+  - 137
+  invalid_neigh_left: []
+  invalid_neigh_right: []
+  invalid_neigh_back:
+  - 96
+  - 95
+  invalid_neigh_forth: []
+  parent: 29
+  children: []
+  dist_to_goal: 0
+  cost_to_start: 0
+  nearest_to_start: {fileID: 0}
+  visited: 0
+  position: {x: -1.25, y: 8.75, z: 3.75}
+  scale: {x: 7.5, y: 2.5, z: 7.5}
   tag: Valid
   edge_idx: []
   edge_dist: []

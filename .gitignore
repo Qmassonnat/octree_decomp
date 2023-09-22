@@ -364,6 +364,8 @@ FodyWeavers.xsd
 
 Library/
 Logs/
+Assets/Data
+Assets/Data/
 Assets/FreeFlyCamera
 Assets/Materials
 Assets/SampleScenes
@@ -374,3 +376,4 @@ Assets/Warframe
 Temp
 UserSettings
 Results.ipynb
+.gitignore

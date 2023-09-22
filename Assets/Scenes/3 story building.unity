@@ -252,6 +252,7 @@ GameObject:
   - component: {fileID: 110651319}
   - component: {fileID: 110651318}
   - component: {fileID: 110651317}
+  - component: {fileID: 110651324}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Obstacle
@@ -598,6 +599,19 @@ Transform:
   m_Father: {fileID: 4611020181789393985}
   m_RootOrder: 184
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &110651324
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 110651316}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6, y: 10, z: 8}
+  m_Center: {x: 3, y: 5, z: -4}
 --- !u!1 &122643100
 GameObject:
   m_ObjectHideFlags: 0
@@ -5308,7 +5322,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh24800
+  m_Name: pb_Mesh121474
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5697,7 +5711,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh24314
+  m_Name: pb_Mesh120988
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
