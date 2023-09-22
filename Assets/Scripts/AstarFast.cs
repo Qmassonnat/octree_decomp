@@ -198,7 +198,7 @@ public class AstarFast : MonoBehaviour
                 node.ResetNode(target);
             double t1 = Time.realtimeSinceStartup;
             AstarSearch();
-            Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
+          //  Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
             CustomNodeScriptable cn = targetNode;
             while (cn.nearest_to_start != startNode)
             {
@@ -256,7 +256,7 @@ public class AstarFast : MonoBehaviour
         }
         temp_edges = new Dictionary<string, List<(string, float)>>();
         double dt = (Time.realtimeSinceStartupAsDouble - t0);
-        Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+       // Debug.Log("TOTAL " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         return (nb_visited, path_length, dt);
     }
 
@@ -264,15 +264,14 @@ public class AstarFast : MonoBehaviour
     private void AstarSearch()
     {
         startNode.cost_to_start = 0;
-        var prioQueue = new List<CustomNodeScriptable>();
-        prioQueue.Add(startNode);
+        var prioQueue = new Utils.PriorityQueue<CustomNodeScriptable, float>();
+        prioQueue.Enqueue(startNode, -Heuristic(startNode));
         do
         {
-            // prioQueue can get very long, instead of sorting everything insert the few values we added
-            // maybe try with only string in the queue and then data.FindNode?
-            var node = prioQueue.First();
-            prioQueue.Remove(node);
-            foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
+            var node = prioQueue.Dequeue();
+            if (node.visited)
+                continue;
+            foreach (var (idx, cost) in node.edges)
             {
                 CustomNodeScriptable childNode;
                 if (idx != "start" && idx != "target" && !data.nodes.ContainsKey(idx))
@@ -289,15 +288,14 @@ public class AstarFast : MonoBehaviour
                 {
                     childNode.cost_to_start = node.cost_to_start + cost;
                     childNode.nearest_to_start = node;
-                    if (!prioQueue.Contains(childNode))
-                        InsertInQueue(prioQueue, childNode);
+                    prioQueue.Enqueue(childNode, Heuristic(node));
                 }
             }
             node.visited = true;
             nb_visited += 1;
             if (node.idx == targetNode.idx)
                 return;
-        } while (prioQueue.Any());
+        } while (prioQueue.Count != 0);
     }
 
     public List<Vector3> ComputePath(CustomNodeScriptable s, CustomNodeScriptable t)
