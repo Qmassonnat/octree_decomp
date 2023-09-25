@@ -213,7 +213,11 @@ public class DynamicObstacles : MonoBehaviour
                     // store the path the obstacle will take
                     try
                     {
-                        intermediate_target[i] = pf.ComputePath(obs_target[i], new_target);
+                        if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
+                            intermediate_target[i] = pf.ComputePath(obs_target[i], new_target);
+                        else
+                            intermediate_target[i] = pfm.ComputePath(obs_target[i], new_target);
+
                     }
                     catch
                     {

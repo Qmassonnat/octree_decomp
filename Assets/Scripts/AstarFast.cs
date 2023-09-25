@@ -306,15 +306,14 @@ public class AstarFast : MonoBehaviour
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
             s.cost_to_start = 0;
-            var prioQueue = new List<CustomNodeScriptable>();
-            prioQueue.Add(s);
+            var prioQueue = new Utils.PriorityQueue<CustomNodeScriptable, float>();
+            prioQueue.Enqueue(s, -Heuristic(s));
             do
             {
-                // prioQueue can get very long, instead of sorting everything insert the few values we added
-                // maybe try with only string in the queue and then data.FindNode?
-                var node = prioQueue.First();
-                prioQueue.Remove(node);
-                foreach (var (idx, cost) in node.edges.OrderBy(x => x.Item2))
+                var node = prioQueue.Dequeue();
+                if (node.visited)
+                continue;
+                foreach (var (idx, cost) in node.edges)
                 {
                     CustomNodeScriptable childNode;
                     if (idx != s.idx && idx != t.idx && !data.nodes.ContainsKey(idx))
@@ -331,14 +330,13 @@ public class AstarFast : MonoBehaviour
                     {
                         childNode.cost_to_start = node.cost_to_start + cost;
                         childNode.nearest_to_start = node;
-                        if (!prioQueue.Contains(childNode))
-                            InsertInQueue(prioQueue, childNode);
+                        prioQueue.Enqueue(childNode, Heuristic(childNode));
                     }
                 }
                 node.visited = true;
                 if (node.idx == t.idx)
                     break;
-            } while (prioQueue.Any());
+            } while (prioQueue.Count != 0);
             CustomNodeScriptable cn = t;
             while (cn.nearest_to_start != s)
             {
@@ -350,7 +348,7 @@ public class AstarFast : MonoBehaviour
             path.Reverse();
             return path;
         }
-        else 
+        else
             return new List<Vector3> { s.position };
     }
 
