@@ -132,7 +132,7 @@ public class WarframeMap : MonoBehaviour
             (avg_length, std_length) = pf.STD(length);
             (avg_time, std_time) = pf.STD(time);
         }
-        sw.WriteLine(filename + "success rate" + (float)n / 1000);
+        sw.WriteLine(filename + "success rate" + (float)n / 10000);
         sw.WriteLine("avg," + avg_length.ToString() + "," + avg_nodes.ToString() + "," + decimal.Round(((decimal)(avg_time)) * 1000m, 3).ToString());
         sw.WriteLine("std," + std_length.ToString() + "," + std_nodes.ToString() + "," + decimal.Round(((decimal)(std_time)) * 1000m, 3).ToString());
         sw.WriteLine("min," + length[0].ToString() + "," + nodes_searched[0].ToString() + "," + decimal.Round(((decimal)(time[0])) * 1000m, 3).ToString());
