@@ -86,14 +86,14 @@ public class OctTreeMerged : MonoBehaviour
         }
         else if (task == "prune")
         {
-            Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            Debug.Log("Before pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
+            //Debug.Log("OctTree built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            //Debug.Log("Before pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
             if (elongated_criteria > 0)
             {
                 t0 = Time.realtimeSinceStartupAsDouble;
                 PruneOctTree();
-                Debug.Log("After pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
-                Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+                //Debug.Log("After pruning: " + data.validNodes.Count + " valid nodes " + data.invalidNodes.Count + " invalid nodes");
+                //Debug.Log("OctTree pruned in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             }
             task = "graph";
         }
@@ -104,7 +104,7 @@ public class OctTreeMerged : MonoBehaviour
             BuildGraph();
             task = "finished";
             gameObject.tag = "Finished";
-            Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            //Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
         }
         else
         {
@@ -112,8 +112,8 @@ public class OctTreeMerged : MonoBehaviour
                 UpdateOctTree();
             else if (!tested)
             {
-                tested = true;
                 GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
+                tested = true;
             }
         }
     }

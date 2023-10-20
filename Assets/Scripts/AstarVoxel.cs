@@ -31,7 +31,7 @@ public class AstarVoxel : MonoBehaviour
 
     }
 
-    private float heuristic(CustomVoxel node)
+    private float Heuristic(CustomVoxel node)
     {
         return node.cost_to_start + node.dist_to_goal;
     }
@@ -134,6 +134,8 @@ public class AstarVoxel : MonoBehaviour
         float dt = (float)(Time.realtimeSinceStartupAsDouble - t0);
         Destroy(gs);
         Destroy(gt);
+        Debug.Log(decimal.Round(((decimal)(dt)) * 1000m, 3) + " ms");
+
         return (nb_visited, path_length, dt);
     }
 
@@ -141,14 +143,14 @@ public class AstarVoxel : MonoBehaviour
     private void AstarSearch()
     {
         startVoxel.cost_to_start = 0;
-        var prioQueue = new List<CustomVoxel>();
-        prioQueue.Add(startVoxel);
+        var prioQueue = new Utils.PriorityQueue<CustomVoxel, float>();
+        prioQueue.Enqueue(startVoxel, -Heuristic(startVoxel));
         do
         {
-            prioQueue = prioQueue.OrderBy(heuristic).ToList();
-            var node = prioQueue.First();
-            prioQueue.Remove(node);
-            foreach (var (idx, cost) in edges[node.name].OrderBy(x => x.Item2))
+            var node = prioQueue.Dequeue();
+            if (node.visited)
+                continue;
+            foreach (var (idx, cost) in edges[node.name])
             {
                 CustomVoxel cv;
                 if (idx != "start" && idx != "target" && !nodes.ContainsKey(idx))
@@ -165,15 +167,14 @@ public class AstarVoxel : MonoBehaviour
                 {
                     cv.cost_to_start = node.cost_to_start + 1;
                     cv.nearest_to_start = node;
-                    if (!prioQueue.Contains(cv))
-                        prioQueue.Add(cv);
+                    prioQueue.Enqueue(cv, Heuristic(node));
                 }
             }
             node.visited = true;
             nb_visited += 1;
             if (node == targetVoxel)
                 return;
-        } while (prioQueue.Any());
+        } while (prioQueue.Count != 0);
     }
 
     public void DrawPath(List<Vector3> path, Color color)

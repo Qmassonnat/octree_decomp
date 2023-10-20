@@ -9,16 +9,79 @@ public class WarframeMap : MonoBehaviour
     public GameObject obstacle;
     public string map_name;
     public bool draw;
+    public bool test_all_maps = true;
     public int i = 10;
     private Vector3 offset;
+    private List<string> scen_list = new List<string>();
+    public GameObject pathFinding;
+    private bool tested = true;
     Vector3 map_size;
     GameObject Obstacles;
     // Start is called before the first frame update
     void Start()
     {
+        if (test_all_maps)
+        {
+            DestroyImmediate(GameObject.Find("PathFinding"));
+            var files = from file in Directory.EnumerateFiles(Application.dataPath + "/Warframe/") select file;
+            foreach (var file in files)
+            {
+                var li = file.Split("/");
+                string filename = li.Last();
+                if (filename.Substring(filename.Length - 6) == "3dscen")
+                {
+                    scen_list.Add(file);
+                }
+            }
+        }
+        else
+        {
+            CreateMap(map_name);
+        }
+    }
+
+    private void Update()
+    {
+        if (tested)
+        {
+            Destroy(GameObject.Find("PathFinding"));
+            Destroy(GameObject.Find("Obstacles"));
+            if (scen_list.Count > 0)
+            {
+                StreamReader sr = new StreamReader(scen_list.First());
+                string s = sr.ReadLine();
+                s = sr.ReadLine();
+                string map_path = Application.dataPath + "/Warframe/" + s;
+                Debug.Log("Loading map: " + s);
+                CreateMap(scen_list.First());
+            }
+            tested = false;
+        }
+        // if the octtree was deleted start a new one
+        else if (!GameObject.Find("PathFinding"))
+        {
+            Debug.Log("Creating new octtree");
+            GameObject pf = GameObject.Instantiate(pathFinding);
+            pf.name = "PathFinding";
+        }
+        // if the experiments are finished destroy the octtree and the map and load a new one
+        // if the octtree is finished run experiments
+        else if (GameObject.Find("PathFinding").GetComponent<OctTreeMerged>().tag == "Finished")
+        {
+            string filename = scen_list.First();
+            scen_list.Remove(scen_list.First());
+            Debug.Log("Running scenario: " + filename);
+            TestScenarioBuckets(filename);
+            tested = true;
+        }
+    }
+
+
+    public void CreateMap(string map_name)
+    {
         Obstacles = new GameObject();
         Obstacles.name = "Obstacles";
-        string map_path = Application.dataPath + "/Warframe/" + map_name + ".3dmap";
+        string map_path = Application.dataPath + "/Warframe/" + map_name;
         CollisionCheck cc = null;
         if (!draw)
             cc = GameObject.Find("PathFinding").GetComponent<CollisionCheck>();
@@ -26,39 +89,67 @@ public class WarframeMap : MonoBehaviour
         OctTreeMerged oc = GameObject.Find("PathFinding").GetComponent<OctTreeMerged>();
         string s = sr.ReadLine();
         string[] l = s.Split(" ");
+        string voxel_type = l[0];
         map_size = new Vector3(float.Parse(l[1]), float.Parse(l[2]), float.Parse(l[3]));
         float max_size = Mathf.Max(map_size.x, Mathf.Max(map_size.y, map_size.z));
-        if (max_size > 512) {
-            offset = new Vector3(512, 0.5f, 512);
+        if (max_size > 512)
+        {
+            offset = new Vector3(512, -0.5f, 512);
             oc.bound = 512;
             oc.zBound = 1024;
         }
-        else if (max_size > 256) {
-            offset = new Vector3(256, 0.5f, 256);
+        else if (max_size > 256)
+        {
+            offset = new Vector3(256, -0.5f, 256);
             oc.bound = 256;
             oc.zBound = 512;
         }
-        else {
-            offset = new Vector3(128, 0.5f, 128);
+        else
+        {
+            offset = new Vector3(128, -0.5f, 128);
             oc.bound = 128;
             oc.zBound = 256;
         }
         s = sr.ReadLine();
-        while (s != null)
+        if (voxel_type == "rev_voxel")
         {
-            string[] li = s.Split(" ");
-            Vector3 obstacle_coord = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
-            if (draw)
+            Debug.Log("Reverse voxels map");
+            while (s != null)
             {
-                GameObject g = Instantiate(obstacle);
-                g.transform.position = obstacle_coord;
-                g.transform.parent = Obstacles.transform;
-            }
-            else
-                cc.obstacleList.Add((obstacle_coord, Vector3.one));
+                string[] li = s.Split(" ");
+                Vector3 obstacle_coord = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
+                if (draw)
+                {
+                    GameObject g = Instantiate(obstacle);
+                    g.transform.position = obstacle_coord;
+                    g.transform.parent = Obstacles.transform;
+                }
+                else
+                    cc.obstacleList.Add((obstacle_coord, Vector3.one));
 
-            s = sr.ReadLine();
+                s = sr.ReadLine();
+            }
         }
+        else if (voxel_type == "voxel")
+        {
+            while (s != null)
+            {
+                string[] li = s.Split(" ");
+                Vector3 obstacle_coord = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2])) - offset;
+                if (draw)
+                {
+                    GameObject g = Instantiate(obstacle);
+                    g.transform.position = obstacle_coord;
+                    g.transform.parent = Obstacles.transform;
+                }
+                else
+                    cc.obstacleList.Add((obstacle_coord, Vector3.one));
+
+                s = sr.ReadLine();
+            }
+        }
+        else
+            Debug.LogError("Unrecognized voxel type: " + voxel_type);
     }
 
     public void TestScenario()
@@ -143,9 +234,10 @@ public class WarframeMap : MonoBehaviour
         sw.Close();
     }
 
-    public void TestScenarioBuckets(int n_buckets=10)
+    public void TestScenarioBuckets(string test_path=null, int n_buckets = 10)
     {
-        string test_path = Application.dataPath + "/Warframe/" + map_name + ".3dmap.3dscen";
+        if (test_path == null)
+            test_path = Application.dataPath + "/Warframe/" + map_name + ".3dscen";
         AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
         AstarMerged pfm = GameObject.Find("PathFinding").GetComponent<AstarMerged>();
         if (!Directory.Exists(Application.dataPath + "/Results/Warframe"))

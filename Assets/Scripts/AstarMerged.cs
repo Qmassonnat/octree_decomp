@@ -63,10 +63,10 @@ public class AstarMerged : MonoBehaviour
             string path = SceneManager.GetActiveScene().name + gameObject.GetComponent<OctTreeMerged>().minSize;
             if (!GetComponent<OctTreeMerged>().load || !AssetDatabase.IsValidFolder("Assets/Data/" + path))
             {
-                Debug.Log("Saving data to file Assets/Data/" + path + "...");
+               // Debug.Log("Saving data to file Assets/Data/" + path + "...");
                 double t0 = Time.realtimeSinceStartupAsDouble;
                 data.SaveData(path);
-                Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+               // Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             }
         }
         else if (done)
@@ -176,7 +176,7 @@ public class AstarMerged : MonoBehaviour
                 node.ResetNode(target);
             double t1 = Time.realtimeSinceStartup;
             AstarSearch();
-            //Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms");
+            Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms" + nb_visited);
             CustomNodeScriptable cn = targetNode;
             while (cn.nearest_to_start != startNode)
             {
@@ -243,7 +243,7 @@ public class AstarMerged : MonoBehaviour
     {
         startNode.cost_to_start = 0;
         var prioQueue = new Utils.PriorityQueue<CustomNodeScriptable, float>();
-        prioQueue.Enqueue(startNode, -Heuristic(startNode)); 
+        prioQueue.Enqueue(startNode, Heuristic(startNode)); 
         do
         {
             var node = prioQueue.Dequeue();

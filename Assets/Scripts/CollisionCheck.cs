@@ -5,7 +5,7 @@ using UnityEngine;
 public class CollisionCheck : MonoBehaviour
 {
     [HideInInspector] public List<(Vector3, Vector3)> obstacleList = new List<(Vector3, Vector3)>();
-
+    [HideInInspector] public bool rev_voxel = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -53,17 +53,30 @@ public class CollisionCheck : MonoBehaviour
             ((max1.y > min2.y && max1.y <= max2.y) || (min1.y >= min2.y && min1.y < max2.y) || (max2.y > min1.y && max2.y <= max1.y) || (min2.y >= min1.y && min2.y < max1.y)) &&
             ((max1.z > min2.z && max1.z <= max2.z) || (min1.z >= min2.z && min1.z < max2.z) || (max2.z > min1.z && max2.z <= max1.z) || (min2.z >= min1.z && min2.z < max1.z)))
             return true;
-        return false;
+        else
+            return false;
     }
 
     public bool IsEmpty(Vector3 center, Vector3 scale)
     {
         // returns false iff the octtree cell with center and scale intersect an obstacle
-        foreach (var (obs_center, obs_scale) in obstacleList)
+        if (rev_voxel)
         {
-            if (CheckCollisions(center, scale, obs_center, obs_scale))
-                return false;
+            foreach (var (obs_center, obs_scale) in obstacleList)
+            {
+                if (CheckCollisions(center, scale, obs_center, obs_scale))
+                    return true;
+            }
+            return false;
         }
-        return true;
+        else
+        {
+            foreach (var (obs_center, obs_scale) in obstacleList)
+            {
+                if (CheckCollisions(center, scale, obs_center, obs_scale))
+                    return false;
+            }
+            return true;
+        }
     }
 }
