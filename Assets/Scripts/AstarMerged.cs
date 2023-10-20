@@ -61,13 +61,14 @@ public class AstarMerged : MonoBehaviour
             else if (GameObject.Find("MapGenerator") == null)
                 A_star_path(start, target);
             string path = SceneManager.GetActiveScene().name + gameObject.GetComponent<OctTreeMerged>().minSize;
-            if (!GetComponent<OctTreeMerged>().load || !AssetDatabase.IsValidFolder("Assets/Data/" + path))
-            {
-               // Debug.Log("Saving data to file Assets/Data/" + path + "...");
-                double t0 = Time.realtimeSinceStartupAsDouble;
-                data.SaveData(path);
-               // Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            }
+            Debug.Log("Saving deactivated");
+            //if (!GetComponent<OctTreeMerged>().load || !AssetDatabase.IsValidFolder("Assets/Data/" + path))
+            //{
+            //    Debug.Log("Saving data to file Assets/Data/" + path + "...");
+            //    double t0 = Time.realtimeSinceStartupAsDouble;
+            //    data.SaveData(path);
+            //    Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            //}
         }
         else if (done)
         {

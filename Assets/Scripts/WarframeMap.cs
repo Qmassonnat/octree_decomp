@@ -66,13 +66,13 @@ public class WarframeMap : MonoBehaviour
         }
         // if the experiments are finished destroy the octtree and the map and load a new one
         // if the octtree is finished run experiments
-        else if (GameObject.Find("PathFinding").GetComponent<OctTreeMerged>().tag == "Finished")
+        else if (scen_list.Count != 0 && GameObject.Find("PathFinding").GetComponent<OctTreeMerged>().tag == "Finished")
         {
+            tested = true;
             string filename = scen_list.First();
             scen_list.Remove(scen_list.First());
             Debug.Log("Running scenario: " + filename);
             TestScenarioBuckets(filename);
-            tested = true;
         }
     }
 
@@ -238,11 +238,16 @@ public class WarframeMap : MonoBehaviour
     {
         if (test_path == null)
             test_path = Application.dataPath + "/Warframe/" + map_name + ".3dscen";
+        else
+        {
+            map_name = test_path.Split("/").Last();
+        }
         AstarFast pf = GameObject.Find("PathFinding").GetComponent<AstarFast>();
         AstarMerged pfm = GameObject.Find("PathFinding").GetComponent<AstarMerged>();
         if (!Directory.Exists(Application.dataPath + "/Results/Warframe"))
             Directory.CreateDirectory(Application.dataPath + "/Results/Warframe");
         string filename = Application.dataPath + "/Results/Warframe/" + map_name + ".csv";
+        Debug.Log("Saving results to: " + filename);
         StreamWriter sw = new StreamWriter(filename);
         double global_avg_nodes = 0;
         double global_avg_time = 0;

@@ -110,11 +110,11 @@ public class OctTreeMerged : MonoBehaviour
         {
             if (GameObject.Find("MapGenerator") == null)
                 UpdateOctTree();
-            else if (!tested)
-            {
-                GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
-                tested = true;
-            }
+            //else if (!tested)
+            //{
+            //    GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
+            //    tested = true;
+            //}
         }
     }
 
