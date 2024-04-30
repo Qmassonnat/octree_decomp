@@ -90,7 +90,7 @@ public class OctTree : MonoBehaviour
             gameObject.tag = "Finished";
             //Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
             AstarOctree path_finder = GetComponent<AstarOctree>();
-            if (false || path_finder.draw)
+            if (path_finder.draw)
             {
                 GameObject dr = GameObject.Find("DrawPath");
                 foreach (var cn in data.validNodes.Values)
@@ -117,7 +117,10 @@ public class OctTree : MonoBehaviour
                 UpdateOctTree();
             else if (!tested)
             {
-                GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
+                if (GetComponent<AstarOctree>().read_from_file)
+                    GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
+                else 
+
                 tested = true;
             }
         }

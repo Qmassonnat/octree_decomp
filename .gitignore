@@ -74,7 +74,6 @@ StyleCopReport.xml
 *_p.c
 *_h.h
 *.ilk
-*.meta
 *.obj
 *.iobj
 *.pch
@@ -367,13 +366,9 @@ Logs/
 Assets/Data
 Assets/Data/
 Assets/FreeFlyCamera
-Assets/Materials
-Assets/SampleScenes
-Assets/SciFi Warehouse Kit
-Assets/Standard Assets
-Assets/TestPoints
 Assets/Warframe
 Temp
 UserSettings
 Results.ipynb
 .gitignore
+/Assets/Results/Warframe/Complex_prunefunnel.txt
