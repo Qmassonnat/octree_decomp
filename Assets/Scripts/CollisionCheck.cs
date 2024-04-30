@@ -27,16 +27,18 @@ public class CollisionCheck : MonoBehaviour
         {
             if (g.CompareTag("Obstacle"))
             {
-                var col = g.GetComponent<BoxCollider>();
-                var trans = col.transform;
-                var min = col.center - col.size * 0.5f;
-                var max = col.center + col.size * 0.5f;
-                var P000 = trans.TransformPoint(new Vector3(min.x, min.y, min.z));
-                var P111 = trans.TransformPoint(new Vector3(max.x, max.y, max.z));
-                Vector3 center = (P000 + P111) / 2;
-                Vector3 scale = (P111 - P000);
-                scale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
-                obstacleList.Add((center, scale));
+                foreach (var col in g.GetComponents<BoxCollider>()) 
+                { 
+                    var trans = col.transform;
+                    var min = col.center - col.size * 0.5f;
+                    var max = col.center + col.size * 0.5f;
+                    var P000 = trans.TransformPoint(new Vector3(min.x, min.y, min.z));
+                    var P111 = trans.TransformPoint(new Vector3(max.x, max.y, max.z));
+                    Vector3 center = (P000 + P111) / 2;
+                    Vector3 scale = (P111 - P000);
+                    scale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+                    obstacleList.Add((center, scale));
+                }
 
             }
         }

@@ -25,22 +25,12 @@ public class DynamicObstacles : MonoBehaviour
     void Start()
     {
         GameObject pf = GameObject.Find("PathFinding");
-        if (pf.GetComponent<OctTree>().isActiveAndEnabled)
+        if (pf.GetComponent<OctTree>()!= null && pf.GetComponent<OctTree>().isActiveAndEnabled)
         {
             bound = pf.GetComponent<OctTree>().bound;
             zBound = pf.GetComponent<OctTree>().zBound;
         }
-        else if (pf.GetComponent<OctTreeFast>().isActiveAndEnabled)
-        {
-            bound = pf.GetComponent<OctTreeFast>().bound;
-            zBound = pf.GetComponent<OctTreeFast>().zBound;
-        }
-        else if (pf.GetComponent<OctTreeMerged>().isActiveAndEnabled)
-        {
-            bound = pf.GetComponent<OctTreeMerged>().bound;
-            zBound = pf.GetComponent<OctTreeMerged>().zBound;
-        }
-        else if (pf.GetComponent<Voxel>().isActiveAndEnabled)
+        else if (pf.GetComponent<Voxel>() != null && pf.GetComponent<Voxel>().isActiveAndEnabled)
         {
             bound = pf.GetComponent<Voxel>().bound;
             bound = pf.GetComponent<Voxel>().zBound;
@@ -126,7 +116,7 @@ public class DynamicObstacles : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarFast>().done || gameObject.GetComponent<AstarMerged>().done)
+        if (gameObject.CompareTag("Finished") && gameObject.GetComponent<AstarOctree>().done || gameObject.GetComponent<AstarOctree>().done)
         {
             if (obs_list.Count == 0)
                 //AddAsteroids(obs_number);
@@ -141,29 +131,15 @@ public class DynamicObstacles : MonoBehaviour
     public void AddObstaclesInOctTree()
     {
         // add  obs_number obstacles at the center of random valid octtree cells
-        OctTreeFast oc = GetComponent<OctTreeFast>();
-        OctTreeMerged ocm = GetComponent<OctTreeMerged>();
+        OctTree oc = GetComponent<OctTree>();
 
-        int n;
-        if (gameObject.GetComponent<OctTreeFast>().isActiveAndEnabled)
-            n = oc.data.nodes.Count;
-        else
-            n = ocm.data.nodes.Count;
+        int n = oc.data.nodes.Count;
         for (int i = 0; i < obs_number; i++)
         {
             int j = Random.Range(0, n);
-            CustomNodeScriptable cn;
-            if (gameObject.GetComponent<OctTreeFast>().isActiveAndEnabled)
-                cn = oc.data.nodes.ElementAt(j).Value;
-            else
-                cn = ocm.data.nodes.ElementAt(j).Value;
+            CustomNodeScriptable cn = oc.data.nodes.ElementAt(j).Value;
             if (cn.idx == "start" || cn.idx == "target")
-            {
-                if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
-                    cn = oc.data.nodes.ElementAt((j + 2) % n).Value;
-                else
-                    cn = ocm.data.nodes.ElementAt((j + 2) % n).Value;
-            }
+                cn = oc.data.nodes.ElementAt((j + 2) % n).Value;
             GameObject obs = GameObject.Instantiate(obstacle);
             obs.transform.localScale = obs_size * Vector3.one;
             obs.transform.position = cn.position;
@@ -175,13 +151,8 @@ public class DynamicObstacles : MonoBehaviour
 
     public void MoveInOctTree()
     {
-        AstarFast pf = GetComponent<AstarFast>();
-        AstarMerged pfm = GetComponent<AstarMerged>();
-        int n;
-        if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
-            n = pf.data.validNodes.Count;
-        else
-            n = pfm.data.validNodes.Count;
+        AstarOctree pf = GetComponent<AstarOctree>();
+        int n = pf.data.validNodes.Count;
         for (int i = 0; i < obs_list.Count; i++)
         {
             GameObject obs = obs_list[i];
@@ -190,34 +161,19 @@ public class DynamicObstacles : MonoBehaviour
             {
                 // when it has reached its target, randomly select another cell and repeat
                 int j = Random.Range(0, n);
-                CustomNodeScriptable new_target;
-                if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
-                    new_target = pf.data.nodes.ElementAt(j).Value;
-                else
-                    new_target = pfm.data.nodes.ElementAt(j).Value;
+                CustomNodeScriptable new_target = pf.data.nodes.ElementAt(j).Value;
                 if (new_target.idx == "start" || new_target.idx == "target")
-                {
-                    if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
-                        new_target = pf.data.nodes.ElementAt((j + 2) % n).Value;
-                    else
-                        new_target = pfm.data.nodes.ElementAt((j + 2) % n).Value;
-                }
+                    new_target = pf.data.nodes.ElementAt((j + 2) % n).Value;
+
                 // if the octtree was updated and the node no longer exists, restart from another point
-                if ((gameObject.GetComponent<AstarFast>().isActiveAndEnabled && !pf.data.nodes.ContainsKey(obs_target[i].idx)) ||
-                    (gameObject.GetComponent<AstarMerged>().isActiveAndEnabled && !pfm.data.nodes.ContainsKey(obs_target[i].idx)))
-                {
+                if (gameObject.GetComponent<AstarOctree>().isActiveAndEnabled && !pf.data.nodes.ContainsKey(obs_target[i].idx))                
                     intermediate_target[i] = new List<Vector3> { new_target.position };
-                }
                 else
                 {
                     // store the path the obstacle will take
                     try
                     {
-                        if (gameObject.GetComponent<AstarFast>().isActiveAndEnabled)
-                            intermediate_target[i] = pf.ComputePath(obs_target[i], new_target);
-                        else
-                            intermediate_target[i] = pfm.ComputePath(obs_target[i], new_target);
-
+                        intermediate_target[i] = pf.ComputePath(obs_target[i], new_target);
                     }
                     catch
                     {

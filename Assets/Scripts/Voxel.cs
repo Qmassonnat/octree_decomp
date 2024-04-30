@@ -46,7 +46,16 @@ public class Voxel : MonoBehaviour
 
             // execute A* on all the random positions
             if (read_from_file)
-                TestRandomPositions(folder);
+            {
+                // Create 1000 pair of test points for each bucket of paths lengths ([0,5], [5,10]...)
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                    GetComponent<AstarVoxel>().CreateRandomPositions(1000, folder);
+                }
+                else
+                    TestRandomPositions(folder);
+            }
             else
                 GetComponent<AstarVoxel>(). A_star_path(start, target);
 
@@ -156,11 +165,12 @@ public class Voxel : MonoBehaviour
         return corner + minSize * new Vector3(1, 1, 1) / 2;
     }
 
+
     public void TestRandomPositions(string folder)
     {
-        if (!Directory.Exists(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name))
-            Directory.CreateDirectory(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name);
-        StreamWriter sw = new StreamWriter(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + "/voxel" + minSize + ".txt");
+        if (!Directory.Exists(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + minSize))
+            Directory.CreateDirectory(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + minSize);
+        StreamWriter sw = new StreamWriter(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + minSize + "/voxel" + minSize + ".txt");
 
         foreach (string filename in Directory.EnumerateFiles(folder))
         {
@@ -172,8 +182,7 @@ public class Voxel : MonoBehaviour
             List<float> time = new List<float>();
             StreamReader sr = new StreamReader(filename);
             string s = sr.ReadLine();
-            int i = 0;
-            while (s != null && i<100)
+            while (s != null)
             {
                 string[] li = s.Split("_");
                 Vector3 start = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2]));
@@ -184,7 +193,6 @@ public class Voxel : MonoBehaviour
                     nodes_searched.Add(searched);
                     length.Add(l);
                     time.Add(dt);
-                    i++;
                 }
                 catch
                 {
@@ -205,7 +213,7 @@ public class Voxel : MonoBehaviour
             Debug.Log("median  length " + length[(int)n / 2] + " nodes " + nodes_searched[(int)n / 2] + " time " + decimal.Round(((decimal)(time[(int)n / 2])) * 1000m, 3));
             Debug.Log("Q3  length " + length[(int)3 * n / 4] + " nodes " + nodes_searched[(int)3 * n / 4] + " time " + decimal.Round(((decimal)(time[(int)3 * n / 4])) * 1000m, 3));
             Debug.Log("max  length " + length[n - 1] + " nodes " + nodes_searched[n - 1] + " time " + decimal.Round(((decimal)(time[n - 1])) * 1000m, 3));
-            sw.WriteLine(filename + "success rate" + (float)n / 100);
+            sw.WriteLine(filename + "success rate" + (float)n / 1000);
             sw.WriteLine("avg," + avg_length.ToString() + "," + avg_nodes.ToString() + "," + decimal.Round(((decimal)(avg_time)) * 1000m, 3).ToString());
             sw.WriteLine("std," + std_length.ToString() + "," + std_nodes.ToString() + "," + decimal.Round(((decimal)(std_time)) * 1000m, 3).ToString());
             sw.WriteLine("min," + length[0].ToString() + "," + nodes_searched[0].ToString() + "," + decimal.Round(((decimal)(time[0])) * 1000m, 3).ToString());
@@ -238,6 +246,8 @@ public class Voxel : MonoBehaviour
         Dictionary < ((int, int, int), (int,int,int)), CustomVoxel> transitions = new Dictionary<((int, int, int), (int, int, int)), CustomVoxel>();
         foreach (CustomVoxel cv in nodes)
         {
+            if (!cv.CompareTag("Valid"))
+                Debug.Log("Invalid");
             Dictionary<((int, int, int), (int, int, int)), CustomVoxel> new_transitions = new Dictionary<((int, int, int), (int, int, int)), CustomVoxel>();
             var neighbors = edges[cv.idx];
             foreach (var neigh_idx in neighbors)

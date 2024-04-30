@@ -6,7 +6,7 @@ using System.Linq;
 using System;
 using UnityEngine.SceneManagement;
 
-public class AstarMerged : MonoBehaviour
+public class AstarOctree : MonoBehaviour
 {
     [HideInInspector] public Vector3 start;
     [HideInInspector] public Vector3 target;
@@ -60,15 +60,15 @@ public class AstarMerged : MonoBehaviour
                 TestRandomPositions(folder);
             else if (GameObject.Find("MapGenerator") == null)
                 A_star_path(start, target);
-            string path = SceneManager.GetActiveScene().name + gameObject.GetComponent<OctTreeMerged>().minSize;
-            Debug.Log("Saving deactivated");
-            //if (!GetComponent<OctTreeMerged>().load || !AssetDatabase.IsValidFolder("Assets/Data/" + path))
-            //{
-            //    Debug.Log("Saving data to file Assets/Data/" + path + "...");
-            //    double t0 = Time.realtimeSinceStartupAsDouble;
-            //    data.SaveData(path);
-            //    Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            //}
+            string path = SceneManager.GetActiveScene().name + gameObject.GetComponent<OctTree>().minSize;
+            //Debug.Log("Saving deactivated");
+            if (!GetComponent<OctTree>().load || !AssetDatabase.IsValidFolder("Assets/Data/" + path))
+            {
+                Debug.Log("Saving data to file Assets/Data/" + path + "...");
+                double t0 = Time.realtimeSinceStartupAsDouble;
+                data.SaveData(path);
+                Debug.Log("Saved data to file Assets/Data/" + path + " in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
+            }
         }
         else if (done)
         {
@@ -175,9 +175,7 @@ public class AstarMerged : MonoBehaviour
         {
             foreach (var node in data.nodes.Values)
                 node.ResetNode(target);
-            double t1 = Time.realtimeSinceStartup;
             AstarSearch();
-            Debug.Log("A* " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t1)) * 1000m, 3) + " ms" + nb_visited);
             CustomNodeScriptable cn = targetNode;
             while (cn.nearest_to_start != startNode)
             {
@@ -217,7 +215,9 @@ public class AstarMerged : MonoBehaviour
             }
             // keep track of the nodes we cross and their distance along the path for the movement model and recomputing the path
             if (move)
+            {
                 ComputePathIdx2(path_positions);
+            }
             path_length = PathLength(path_positions);
         }
         else
@@ -384,9 +384,8 @@ public class AstarMerged : MonoBehaviour
         // returns true iff the straight line between x and y does not intersect an invalid octtree cell
         //bool visible = !Physics.Raycast(x, y - x, Vector3.Distance(y, x));
         bool visible = true;
-        float step = gameObject.GetComponent<OctTreeMerged>().minSize / 5;
+        float step = gameObject.GetComponent<OctTree>().minSize / 5;
         float n = Mathf.Floor(Vector3.Distance(x, y) / step);
-        OctTreeMerged octTreeGenerator = gameObject.GetComponent<OctTreeMerged>();
         for (int j = 0; j < n; j++)
         {
             Vector3 pos = x + j / n * (y - x);
@@ -411,12 +410,12 @@ public class AstarMerged : MonoBehaviour
     public void CreateRandomPositions(int n, string folder)
     {
         float t = Time.realtimeSinceStartup;
-        // preparing 6 buckets of size bound/2
-        var octTree = GetComponent<OctTreeMerged>();
-        List<int> count = new List<int> { 0, 0, 0, 0, 0, 0 };
-        StreamWriter[] sw = new StreamWriter[6];
+        // preparing 10 buckets of size bound/4
+        var octTree = GetComponent<OctTree>();
+        List<int> count = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0};
+        StreamWriter[] sw = new StreamWriter[10];
         for (int idx = 0; idx < count.Count; idx++)
-            sw[idx] = new StreamWriter(folder + "/" + idx * octTree.bound / 2 + "-" + (idx + 1) * octTree.bound / 2 + ".txt");
+            sw[idx] = new StreamWriter(folder + "/" + idx * octTree.bound / 4 + "-" + (idx + 1) * octTree.bound / 4 + ".txt");
 
         while (count.Any(i => i < n))
         {
@@ -426,7 +425,7 @@ public class AstarMerged : MonoBehaviour
             try
             {
                 var (nb_visited, length, dt) = A_star_path(start, target);
-                int idx = (int)Mathf.Floor(2 * length / octTree.bound);
+                int idx = (int)Mathf.Floor(4 * length / octTree.bound);
                 if (idx >= count.Count)
                     Debug.Log("path too long: " + length);
                 if (count[idx] < n)
@@ -448,11 +447,11 @@ public class AstarMerged : MonoBehaviour
 
     public void TestRandomPositions(string folder)
     {
-        if (!Directory.Exists(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name))
-            Directory.CreateDirectory(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name);
-        StreamWriter sw = new StreamWriter(Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + "/octTree_m" + GetComponent<OctTreeMerged>().elongated_criteria + "_p" + prune + "f_" + funnel + ".txt");
-        StreamWriter log = new StreamWriter(Application.dataPath + "/Results/log.txt");
-        int n_iter = 0;
+        string path = Application.dataPath + "/Results/" + SceneManager.GetActiveScene().name + GetComponent<OctTree>().minSize;
+        Debug.Log(folder);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        StreamWriter sw = new StreamWriter(path + "/octTree_m" + GetComponent<OctTree>().elongated_criteria + "_p" + prune + "f_" + funnel + ".txt");
         foreach (string filename in Directory.EnumerateFiles(folder))
         {
             var split_filename = filename.Split(".");
@@ -465,8 +464,6 @@ public class AstarMerged : MonoBehaviour
             string s = sr.ReadLine();
             while (s != null)
             {
-                log.WriteLine(n_iter);
-                n_iter++;
                 string[] li = s.Split("_");
                 Vector3 start = new Vector3(float.Parse(li[0]), float.Parse(li[1]), float.Parse(li[2]));
                 Vector3 target = new Vector3(float.Parse(li[3]), float.Parse(li[4]), float.Parse(li[5]));

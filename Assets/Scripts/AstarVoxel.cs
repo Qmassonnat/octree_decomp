@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 
 public class AstarVoxel : MonoBehaviour
 {
@@ -29,6 +29,44 @@ public class AstarVoxel : MonoBehaviour
         target = GameObject.Find("Target").transform.position;
         voxelizer = gameObject.GetComponent<Voxel>();
 
+    }
+
+    public void CreateRandomPositions(int n, string folder)
+    {
+        float t = Time.realtimeSinceStartup;
+        // preparing 10 buckets of size bound/4
+        var voxelizer = GetComponent<Voxel>();
+        List<int> count = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        StreamWriter[] sw = new StreamWriter[10];
+        for (int idx = 0; idx < count.Count; idx++)
+            sw[idx] = new StreamWriter(folder + "/" + idx * voxelizer.bound / 4 + "-" + (idx + 1) * voxelizer.bound / 4 + ".txt");
+
+        while (count.Any(i => i < n))
+        {
+            Vector3 start = new Vector3(UnityEngine.Random.Range(-voxelizer.bound, voxelizer.bound), UnityEngine.Random.Range(0, voxelizer.zBound), UnityEngine.Random.Range(-voxelizer.bound, voxelizer.bound));
+            Vector3 target = new Vector3(UnityEngine.Random.Range(-voxelizer.bound, voxelizer.bound), UnityEngine.Random.Range(0, voxelizer.zBound), UnityEngine.Random.Range(-voxelizer.bound, voxelizer.bound));
+
+            try
+            {
+                var (nb_visited, length, dt) = A_star_path(start, target);
+                int idx = (int)Mathf.Floor(4 * length / voxelizer.bound);
+                if (idx >= count.Count)
+                    Debug.Log("path too long: " + length);
+                if (count[idx] < n)
+                {
+                    count[idx]++;
+                    string s = start.x.ToString() + "_" + start.y.ToString() + "_" + start.z.ToString() + "_" + target.x.ToString() + "_" + target.y.ToString() + "_" + target.z.ToString();
+                    sw[idx].WriteLine(s);
+                }
+            }
+            catch
+            {
+                Debug.Log("random point creation failed");
+            }
+        }
+        for (int idx = 0; idx < count.Count; idx++)
+            sw[idx].Close();
+        Debug.Log("Found " + n + "pair of points for each bucket in " + decimal.Round(((decimal)(Time.realtimeSinceStartup - t)) * 1000m, 3) + " ms");
     }
 
     private float Heuristic(CustomVoxel node)
@@ -134,7 +172,7 @@ public class AstarVoxel : MonoBehaviour
         float dt = (float)(Time.realtimeSinceStartupAsDouble - t0);
         Destroy(gs);
         Destroy(gt);
-        Debug.Log(decimal.Round(((decimal)(dt)) * 1000m, 3) + " ms");
+        //Debug.Log(decimal.Round(((decimal)(dt)) * 1000m, 3) + " ms");
 
         return (nb_visited, path_length, dt);
     }

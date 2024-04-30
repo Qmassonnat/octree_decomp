@@ -331,7 +331,7 @@ public class NodeDataMerged : ScriptableObject
         // store the global id for merged octtree
         using (StreamWriter writetext = new StreamWriter(path + "/id.txt"))
         {
-            writetext.WriteLine(GameObject.Find("PathFinding").GetComponent<OctTreeMerged>().global_id);
+            writetext.WriteLine(GameObject.Find("PathFinding").GetComponent<OctTree>().global_id);
         }
     }
 
