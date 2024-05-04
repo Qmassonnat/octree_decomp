@@ -91,7 +91,7 @@ MonoBehaviour:
   vv: {fileID: 8898184809814771781, guid: e393066992b2c3b489d27b1b465b1793, type: 3}
   zBound: 20
   elongated_criteria: 99
-  load: 1
+  load: 0
   data: {fileID: 0}
   global_id: 1
 --- !u!114 &5114098842706080968
