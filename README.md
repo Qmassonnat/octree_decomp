@@ -1,11 +1,11 @@
 # Octree decomposition for 3D pathfinding
 
 This Unity project implements 3D pathfinding using octrees, and contains several 3D scenes to experiment with it.
-More detailed experiments can be conducted using the [Warframe](https://movingai.com/benchmarks/warframe/index.html).
+More detailed experiments can be conducted using the [Warframe](https://movingai.com/benchmarks/warframe/index.html) dataset.
 
 ## Installation
 
-This project requires UnityHub and Unity v2021.3.13f1
+This project requires UnityHub and Unity v2021.3.13f1.
 After cloning the project, open it through UnityHub and open one of the Unity scenes.
 3 story building, BuildingTest, Cave, Industrial, ObstacleBuilding and Zigzag are scenes that showcase various 3D environments.
 Asteroids and Young show basic scenarios of pathfinding in dynamic environments.
