@@ -132,15 +132,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5114098842706080968, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: draw
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5114098842706080968, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: prune
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5114098842706080968, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: funnel
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5114098842706080968, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
+      propertyPath: read_from_file
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6896030649491526210, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: m_RootOrder
@@ -405,7 +409,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obstacle: {fileID: 7030054427200104226, guid: 4d7829305cbe2694d8d1b7493b25b450, type: 3}
   map_name: Simple
-  draw: 1
+  draw: 0
 --- !u!4 &391903636
 Transform:
   m_ObjectHideFlags: 0

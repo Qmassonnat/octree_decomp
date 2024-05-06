@@ -6582,6 +6582,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5114098842706080968, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
+      propertyPath: draw
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6896030649491526210, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: m_RootOrder
       value: 6
@@ -6629,6 +6633,10 @@ PrefabInstance:
     - target: {fileID: 6896030649491526236, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
       propertyPath: m_Name
       value: PathFinding
+      objectReference: {fileID: 0}
+    - target: {fileID: 8298304885888053351, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}
+      propertyPath: draw
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4512844d0211c164d8fffa4b0bc9a728, type: 3}

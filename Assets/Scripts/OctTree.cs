@@ -10,6 +10,7 @@ public class OctTree : MonoBehaviour
 {
     public float minSize;
     public float bound = 10;
+    public bool draw;
     public GameObject vi;
     public GameObject vv;
     [HideInInspector] public float zBound;
@@ -89,8 +90,7 @@ public class OctTree : MonoBehaviour
             task = "finished";
             gameObject.tag = "Finished";
             //Debug.Log("Graph built in " + decimal.Round(((decimal)(Time.realtimeSinceStartupAsDouble - t0)) * 1000m, 3) + " ms");
-            AstarOctree path_finder = GetComponent<AstarOctree>();
-            if (path_finder.draw)
+            if (draw)
             {
                 GameObject dr = GameObject.Find("DrawPath");
                 foreach (var cn in data.validNodes.Values)
@@ -119,8 +119,6 @@ public class OctTree : MonoBehaviour
             {
                 if (GetComponent<AstarOctree>().read_from_file)
                     GameObject.Find("MapGenerator").GetComponent<WarframeMap>().TestScenarioBuckets();
-                else 
-
                 tested = true;
             }
         }
@@ -761,39 +759,6 @@ public class OctTree : MonoBehaviour
                 }
                 t_path += Time.realtimeSinceStartupAsDouble - t0;
                 t_total += Time.realtimeSinceStartupAsDouble - t0;
-                if (false || path_finder.draw)
-                {
-                    GameObject dr = GameObject.Find("DrawPath");
-                    foreach (var cn in data.validNodes.Values)
-                    {
-                        GameObject g = GameObject.Instantiate(vv);
-                        g.transform.position = cn.position;
-                        g.name = cn.idx;
-                        g.transform.localScale = cn.scale;
-                        g.transform.parent = GameObject.Find("DrawPath").transform ;
-                    }
-                    foreach (var cn in data.invalidNodes.Values)
-                    {
-                        GameObject g = GameObject.Instantiate(vi);
-                        g.transform.position = cn.position;
-                        g.transform.localScale = cn.scale;
-                        g.name = cn.idx;
-                        g.transform.parent = GameObject.Find("DrawPath").transform;
-                    }
-                    /*foreach (var cn in data.nodes.Values)
-                    {
-                        GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        g.transform.position = cn.position;
-                        g.transform.localScale = 0.1f * (0.1f*Vector3.one + cn.scale);
-                        g.name = cn.idx;
-                        g.transform.parent = GameObject.Find("DrawPath").transform;
-                    //    foreach (var e in cn.edges)
-                    //    {
-                    //        CustomNodeScriptable c22 = data.nodes[e.Item1];
-                    //        path_finder.DrawPath(new List<Vector3> { cn.position, c22.position }, Color.black);
-                    //    }
-                    }*/
-                }
             }
 
         }

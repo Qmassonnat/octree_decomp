@@ -49,14 +49,14 @@ public class AstarOctree : MonoBehaviour
 
             // Create 1000 pair of test points for each bucket of paths lengths ([0,5], [5,10]...)
             string folder = Application.dataPath + "/TestPoints/" + SceneManager.GetActiveScene().name;
-            if (!Directory.Exists(folder) && read_from_file)
+            if (GameObject.Find("MapGenerator") == null && !Directory.Exists(folder) && read_from_file)
             {
                 Directory.CreateDirectory(folder);
                 CreateRandomPositions(1000, folder);
             }
 
             // execute A* on all the random positions
-            if (read_from_file)
+            if (GameObject.Find("MapGenerator") == null && read_from_file)
                 TestRandomPositions(folder);
             else
                 A_star_path(start, target);
